@@ -134,7 +134,15 @@ function watchDir(dir){
  * Get list of application
  * @param {List of application} apps 
  */
-function load(apps){
+function load(){
+    var apps;
+    if(arguments.length==1 &&
+       arguments[0] instanceof Array ){
+        apps=arguments[0];
+    }
+    else {
+        apps=arguments;
+    }
     
     app = express();
     app.use(reloadRouter.handler());
