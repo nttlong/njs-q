@@ -1,5 +1,5 @@
 var key= "auto-router-lock-key";
-var sync=require("quicky/q-sync");
+var sync=require("../q-sync");
 var AsyncLock = require('async-lock');
 var lock = new AsyncLock();
 module.exports=function(fn){
