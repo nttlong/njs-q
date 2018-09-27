@@ -21,7 +21,7 @@ var tenancy=require("./tenancy");
 var fs=require("fs");
 var cache_watcher={}
 var app=undefined;
- 
+var autoRoute=require("./../auto-router"); 
 var reloadRouter=new expressRouteReLoad.ReloadRouter();
 /**
  * Get root directory where source is hosting
@@ -44,58 +44,64 @@ function getListOfApps(){
     return global["___n-apps___caching"];
 }
 function loadApp(appItem){
-    try {
-        
-        var appModule=require(getRootDir()+path.sep+path.sep+appItem.dir);
-        appItem.fullHostDir=getRootDir()+path.sep+appItem.dir;
-        if(!appModule.router){
-            throw(new Error("It look like you forgot create router in '"+_path+"'\r\n How to export router?\r\n"+
-        "Inside '"+_path+"' place module.exports={router:router} \r\n"+
-        "in which router is your router")
-        );
-        }
-        global["___n-apps___caching"].push({
-            name:appItem.name,
-            app:appItem,
-            module:appModule
-        });
-        appItem._mdl=appModule;
-        if(appItem._mdl.getFileStorage){
-            appItem._mdl.router.use('/resources',express.static(appItem._mdl.getFileStorage()))
-        }
-        var prefix='/';
-        if(tenancy.isUseMultitenancy()){
-            prefix='/:tenancy/'
-        }
-        if(appItem.hostDir){
+    appItem.fullHostDir=getRootDir()+path.sep+appItem.dir;
+    if(!appItem.isAutoRoute){
+        try {
+            
+            var appModule=require(getRootDir()+path.sep+path.sep+appItem.dir);
+           
+            if(!appModule.router){
+                throw(new Error("It look like you forgot create router in '"+_path+"'\r\n How to export router?\r\n"+
+            "Inside '"+_path+"' place module.exports={router:router} \r\n"+
+            "in which router is your router")
+            );
+            }
+            global["___n-apps___caching"].push({
+                name:appItem.name,
+                app:appItem,
+                module:appModule
+            });
+            appItem._mdl=appModule;
+            if(appItem._mdl.getFileStorage){
+                appItem._mdl.router.use('/resources',express.static(appItem._mdl.getFileStorage()))
+            }
+            var prefix='/';
             if(tenancy.isUseMultitenancy()){
-                router.use(prefix+appItem.hostDir, tenancy.mRoute(appModule.router));
+                prefix='/:tenancy/'
             }
-            else {
-                router.use(prefix+appItem.hostDir, appModule.router);
+            if(appItem.hostDir){
+                if(tenancy.isUseMultitenancy()){
+                    router.use(prefix+appItem.hostDir, tenancy.mRoute(appModule.router));
+                }
+                else {
+                    router.use(prefix+appItem.hostDir, appModule.router);
+                }
+                
+                if(appModule.authenticate){
+                    router.use(prefix+appItem.hostDir,function(req,res,next){
+                        if(req.getCurrentUrl){
+                            appModule.authenticate(req,res,next);
+                        }
+                        else {
+                            next();
+                        }
+                    });
+                }
+            }
+            else{
+                
+                router.use(prefix,appModule.router);
+            
             }
             
-            if(appModule.authenticate){
-                router.use(prefix+appItem.hostDir,function(req,res,next){
-                    if(req.getCurrentUrl){
-                        appModule.authenticate(req,res,next);
-                    }
-                    else {
-                        next();
-                    }
-                });
-            }
+            logger.info("load app:"+JSON.stringify(appItem));
+        } catch (error) {
+            logger.error(appItem,error);
+            console.log(appItem,error);
         }
-        else{
-            
-            router.use(prefix,appModule.router);
-        
-        }
-        
-        logger.info("load app:"+JSON.stringify(appItem));
-    } catch (error) {
-        logger.error(appItem,error);
-        console.log(appItem,error);
+    }
+    else {
+        autoRoute.loadFromDir(appItem.hostDir, appItem.fullHostDir,router,appItem);
     }
 }
 function watchDir(dir){
