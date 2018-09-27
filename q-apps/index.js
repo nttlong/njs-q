@@ -141,7 +141,11 @@ function load(){
         apps=arguments[0];
     }
     else {
-        apps=arguments;
+        apps=[];
+        for(var i=0;i<arguments.length;i++){
+            apps.push(arguments[i]);
+        }
+         
     }
     
     app = express();
