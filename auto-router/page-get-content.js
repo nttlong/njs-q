@@ -40,9 +40,13 @@ function applyLanguage(languageInfo,info){
                 }
             }    
             if(ret.script){
-                var i=ret.script.indexOf("{")
-                var script=ret.script.substring(i,ret.script.length)
-                ret.runner=eval("(function(context,req,res,next)"+ script+")")
+                // var i=ret.script.indexOf("{");
+                // var end=ret.script.length-1;
+                // while (end >= 0 && ret.script[end]!="}"){
+                //     end--;
+                // }
+                // var script = ret.script.substring(i+1, end);
+                ret.runner = eval(ret.script);
             }
     return ret;
 }
@@ -57,8 +61,6 @@ function loadFile(file){
                 var languageInfo= pageLanguage.extractItems(content);
                 var ret=pageGetContentServer(content);
                 ret =applyLanguage(languageInfo,ret);
-                
-                
                 ret.originFile=file;
                 require('chokidar').watch(file,{}).on('change', function(path, stats) {
                     var pageCompiler=require("./page-compiler");
@@ -71,7 +73,6 @@ function loadFile(file){
             } catch (error) {
                 cb(error);
             }
-           
         });
         
     }

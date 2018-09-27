@@ -43,10 +43,8 @@ function compiler(info,model){
     var ECT = require('ect');
 
     var renderer = ECT();
-
-    var html = renderer.render(info.renderFile, model||{
-        getRes:()=>{}
-    });
+    renderer.render.prototype.test = () => { };
+    var html = renderer.render(info.renderFile, model);
     return html;
 }
 module.exports={
