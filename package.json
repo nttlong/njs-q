@@ -50,7 +50,8 @@
     "filewatcher": "^3.0.1",
     "log4js": "^3.0.5",
     "mongodb": "^3.1.6",
-    "mongoose": "^5.2.17"
+    "mongoose": "^5.2.17",
+    "mustache": "^3.0.0"
   },
   "devDependencies": {},
   "license": "ISC",
