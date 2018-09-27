@@ -36,7 +36,9 @@
   "_spec": "./packages/quicky",
   "_where": "E:\\code\\nodejs\\n-app",
   "author": "",
-  "dependencies": {},
+  "dependencies": {
+    "log4js": "^3.0.5"
+  },
   "devDependencies": {},
   "license": "ISC",
   "main": "index.js",
