@@ -11,7 +11,7 @@ function create(appHostDir,appDir,router,app){
         router.use("/".join("",appHostDir,"static"),express.static(path.sep.join(app.fullHostDir,'static')));
     }
     else {
-        router.use("/static"),express.static(path.sep.join(app.fullHostDir,'static'));
+        router.use("/static",express.static(path.sep.join(app.fullHostDir,'static')));
     }
     
     urls =urls.sort((x,y)=>{return x.url.length-y.url.length})
