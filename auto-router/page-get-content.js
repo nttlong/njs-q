@@ -3,6 +3,8 @@ global[key]={};
 var pageLanguage=require("./page-language");
 var fs=require('fs');
 var pageGetContentServer=require("./page-get-server-script");
+var pageResolveClientStaticScript=require("./page-resolve-client-static-script");
+var pageServerFunctions=require("./page-server-functions");
 var pageLockRunner=require("./page-lock-runner");
 var chokidar = require('chokidar');
 var watcher = chokidar.watch('file, dir, or glob', {
@@ -50,7 +52,7 @@ function applyLanguage(languageInfo,info){
             }
     return ret;
 }
-function loadFile(file){
+function loadFile(req,res,file,context){
     if(global[key][file]){
         return global[key][file];
     }
@@ -60,7 +62,9 @@ function loadFile(file){
                 var content=fs.readFileSync(file, "utf8");
                 var languageInfo= pageLanguage.extractItems(content);
                 var ret=pageGetContentServer(content);
-                ret =applyLanguage(languageInfo,ret);
+                ret.content=pageResolveClientStaticScript(req,res,ret.content,context);
+                ret.content=pageServerFunctions(req,res,ret.content,context)
+                ret =applyLanguage(languageInfo,ret,context);
                 ret.originFile=file;
                 require('chokidar').watch(file,{}).on('change', function(path, stats) {
                     var pageCompiler=require("./page-compiler");

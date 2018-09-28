@@ -18,23 +18,26 @@ function excutor(app,info){
     var me=this;
 
     me.exec=function(req,res,next){
-        var info=pageReader.loadFile(me.info.file);
+        
         var model = {
             form:{}
         };
-        requestExt(info,model,req,res);
+        requestExt(me,model,req,res);
+        var info=pageReader.loadFile(req,res,me.info.file,me);
+        if(info.runner){
+            var retFn = info.runner(model, req, res, next);
+            if (retFn.load) {
+                retFn.load();
+            }
+            if(req.body){
+                var data=requestPost(req,res,next);
+                 if (retFn.post){
+                    retFn.post(req.postData);
+                    
+                }
+             }
+        }
         
-        var retFn = info.runner(model, req, res, next);
-        if (retFn.load) {
-            retFn.load();
-        }
-        if(req.body){
-           var data=requestPost(req,res,next);
-            if (retFn.post){
-               retFn.post(req.postData);
-               
-           }
-        }
         info.url=me.info.url;
         info.keyPath=trim(info.url,'/');
         var ret = pageComipler.compiler(info, model);

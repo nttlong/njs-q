@@ -1,4 +1,5 @@
-function apply(owner,model,req,res){
+function apply(context,model,req,res){
+    
     if (!req.__abs_url__) {
 
         var requrl = req.protocol + "://" + req.get('host');
@@ -9,12 +10,13 @@ function apply(owner,model,req,res){
         return req.__abs_url__;
     };
     var getAppUrl = function (file) {
-        if (me.app.hostDir) {
+        
+        if (context.app.hostDir) {
             if (req.tenancyCode) {
-                return getAbsUrl() + "/" + req.tenancyCode + "/" + me.app.hostDir + (file ? ("/" + file) : "");
+                return getAbsUrl() + "/" + req.tenancyCode + "/" + context.app.hostDir + (file ? ("/" + file) : "");
             }
             else {
-                return getAbsUrl() + "/" + me.app.hostDir + (file ? ("/" + file) : "");
+                return getAbsUrl() + "/" + context.app.hostDir + (file ? ("/" + file) : "");
             }
 
         }

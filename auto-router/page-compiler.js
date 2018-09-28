@@ -23,7 +23,7 @@ function compiler(info,model){
                     }
                     var items=info.keyPath.split('/');
                     var _rootDir=rootDir;
-                    for(var i=0;i<items.length;i++){
+                    for(var i=0;i<items.length-1;i++){
                         _rootDir=path.join(_rootDir,items[i]);
                         if (!fs.existsSync(_rootDir)) {
                             fs.mkdirSync(_rootDir);

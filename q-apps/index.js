@@ -1,3 +1,4 @@
+require("../q-extension");
 var logger=require("../q-logger")(__filename)
 var expressRouteReLoad=require("express-route-reload");
 var reloader=new  expressRouteReLoad.ReloadRouter()
@@ -11,6 +12,7 @@ const fileUpload = require('express-fileupload');
 var router = undefined;
 // require('express-namespace');
 var path=require("path");
+var fs = require('fs');
 var secret_key=undefined
 global._rootDir=path.parse(require.main.filename).dir;
 global["___n-apps___caching"]=[];
@@ -43,8 +45,9 @@ function setSecretKey(key){
 function getListOfApps(){
     return global["___n-apps___caching"];
 }
-function loadApp(appItem){
-    appItem.fullHostDir=getRootDir()+path.sep+appItem.dir;
+function loadApp(appItem,app){
+    appItem.fullHostDir=(getRootDir()+path.sep+appItem.dir).toPath();
+    appItem.isAutoRoute = ! fs.existsSync(path.sep.join(appItem.fullHostDir,"router.js"))
     if(!appItem.isAutoRoute){
         try {
             
@@ -201,7 +204,7 @@ function load(){
             watchDir(getRootDir()+path.sep+appItem.dir);
         }
         
-        loadApp(appItem);
+        loadApp(appItem,app);
         app.use(router);
         // reloadRouter.reload([router]);
         
