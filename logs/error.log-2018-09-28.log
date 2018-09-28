@@ -1,0 +1,63 @@
+[2018-09-28T16:48:36.973] [ERROR] error - /home/hcsadmin/source/nodejs/quicky/q-api/run.js { Error: Cannot find module 'quicky/q-apps'
+    at Function.Module._resolveFilename (module.js:547:15)
+    at Function.Module._load (module.js:474:25)
+    at Module.require (module.js:596:17)
+    at require (internal/module.js:11:18)
+    at Object.getKey (/home/hcsadmin/source/nodejs/quicky/q-api/run.js:73:18)
+    at IncomingMessage.getApi (/home/hcsadmin/source/nodejs/quicky/auto-router/request-ext.js:117:20)
+    at Object.eval [as runner] (<anonymous>:4:17)
+    at me.exec (/home/hcsadmin/source/nodejs/quicky/auto-router/executor.js:28:30)
+    at Layer.handle [as handle_request] (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:317:13)
+    at /home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:284:7
+    at Function.process_params (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:335:12)
+    at next (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:275:10)
+    at Function.handle (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:174:3)
+    at router (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:47:12)
+    at Layer.handle [as handle_request] (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:317:13)
+    at /home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:284:7
+    at Function.process_params (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:335:12)
+    at next (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:275:10)
+    at /home/hcsadmin/source/nodejs/quicky/q-apps/index.js:196:13
+    at Layer.handle [as handle_request] (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:317:13)
+    at /home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:284:7
+    at Function.process_params (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:335:12)
+    at next (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:275:10)
+    at Immediate.<anonymous> (/home/hcsadmin/source/nodejs/quicky/node_modules/express-session/index.js:489:7)
+    at runCallback (timers.js:798:20)
+    at tryOnImmediate (timers.js:752:5)
+    at processImmediate [as _immediateCallback] (timers.js:729:5)
+ code: 'MODULE_NOT_FOUND' }
+[2018-09-28T16:49:25.556] [ERROR] error - /home/hcsadmin/source/nodejs/quicky/q-api/run.js Error: 
+It look like you forgot call 'connect' of  'q-api':
+		How to call 'connect' of 'q-api'
+			connect(mongodb connection url, api cache collection)
+    at Object.getKey (/home/hcsadmin/source/nodejs/quicky/q-api/run.js:76:23)
+    at IncomingMessage.getApi (/home/hcsadmin/source/nodejs/quicky/auto-router/request-ext.js:117:20)
+    at Object.eval [as runner] (<anonymous>:4:17)
+    at me.exec (/home/hcsadmin/source/nodejs/quicky/auto-router/executor.js:28:30)
+    at Layer.handle [as handle_request] (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:317:13)
+    at /home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:284:7
+    at Function.process_params (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:335:12)
+    at next (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:275:10)
+    at Function.handle (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:174:3)
+    at router (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:47:12)
+    at Layer.handle [as handle_request] (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:317:13)
+    at /home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:284:7
+    at Function.process_params (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:335:12)
+    at next (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:275:10)
+    at /home/hcsadmin/source/nodejs/quicky/q-apps/index.js:196:13
+    at Layer.handle [as handle_request] (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:317:13)
+    at /home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:284:7
+    at Function.process_params (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:335:12)
+    at next (/home/hcsadmin/source/nodejs/quicky/node_modules/express/lib/router/index.js:275:10)
+    at Immediate.<anonymous> (/home/hcsadmin/source/nodejs/quicky/node_modules/express-session/index.js:489:7)
+    at runCallback (timers.js:798:20)
+    at tryOnImmediate (timers.js:752:5)
+    at processImmediate [as _immediateCallback] (timers.js:729:5)
+

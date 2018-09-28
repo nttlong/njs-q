@@ -70,7 +70,7 @@ function connect(url,collection){
 }
 function getKey(path){
     try {
-        var apps=require("quicky/q-apps");
+        var apps=require("../q-apps");
         if(!_cache[path]){
             if(!_db){
                 throw(Error("\r\nIt look like you forgot call 'connect' of  'q-api':\r\n"+

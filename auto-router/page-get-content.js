@@ -2,6 +2,7 @@ var key= "__${page-get-content}$__";
 global[key]={};
 var pageLanguage=require("./page-language");
 var fs=require('fs');
+var path=require("path")
 var pageGetContentServer=require("./page-get-server-script");
 var pageResolveClientStaticScript=require("./page-resolve-client-static-script");
 var pageServerFunctions=require("./page-server-functions");
@@ -66,6 +67,13 @@ function loadFile(req,res,file,context){
                 ret.content=pageServerFunctions(req,res,ret.content,context)
                 ret =applyLanguage(languageInfo,ret,context);
                 ret.originFile=file;
+                ret.fileName=path.basename(file);
+                ret.dirName=file.substring(0,file.length-ret.fileName-1);
+                ret.rootDir=path.dirname(require.main.filename);
+                var dir=path.dirname(file);
+                ret.relDir=ret.rootDir.substring(dir.length,ret.rootDir.length);
+                ret.relFileName=ret.relDir+path.sep+ret.fileName;
+                ret.viewPath=ret.rootDir+"/"+ret.fileName;
                 require('chokidar').watch(file,{}).on('change', function(path, stats) {
                     var pageCompiler=require("./page-compiler");
                     pageCompiler.clearCache();

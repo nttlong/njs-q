@@ -1,3 +1,13 @@
+var api=require("../q-api");
+var tenancy=require("../q-apps/tenancy");
+var sync=require("../q-sync");
+var path=require("path");
+var ECT = require('ect');
+var LANGUAGE=require("../q-language");
+var caching={};
+var session_caching={}
+var logger=require("../q-logger")(__filename);
+var sessionCache=require("../q-apps/session-cache");
 function apply(context,model,req,res){
     
     if (!req.__abs_url__) {
@@ -54,10 +64,10 @@ function apply(context,model,req,res){
         return LANGUAGE.getItem(getLanguage(), "-", "-", key, value);
     };
     var getAppRes = function (key, value) {
-        return LANGUAGE.getItem(getLanguage(), me.app.name, "-", key, value);
+        return LANGUAGE.getItem(getLanguage(), context.app.name, "-", key, value);
     };
     var getRes = function (key, value) {
-        return LANGUAGE.getItem(getLanguage(), me.app.name, owner.fileName, key, value);
+        return LANGUAGE.getItem(getLanguage(), context.app.name, owner.fileName, key, value);
     };
     var getCurrentUrl = function () {
         var _url = req.url.split('?')[0];
@@ -89,7 +99,7 @@ function apply(context,model,req,res){
         return unescape(decodeURIComponent(url));
     };
     var getViewPath = function () {
-        return req.__viewPath || owner.fileName
+        return req.__viewPath || context.info.relFileName;
     };
     var setViewPath = function (path) {
         req.__viewPath = path;
@@ -104,7 +114,7 @@ function apply(context,model,req,res){
         }
     };
     var getApi = function (path) {
-        return api.getKey(me.app.hostDir + "@" + path)
+        return api.getKey(context.app.hostDir + "@" + path)
     };
     var getFullUrl = function () {
         return req.getAppUrl(req.url.substring(1, req.url.length))
@@ -124,7 +134,8 @@ function apply(context,model,req,res){
         getUser,
         getViewPath,
         setUser,
-        setViewPath
+        setViewPath,
+        loadModule
     ];
     for(var i=0;i<fnList.length;i++){
         model[fnList[i].name] = fnList[i];

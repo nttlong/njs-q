@@ -5,7 +5,14 @@
     </head>
     <script server>
         (function(model,req,res,next){
-           
+            debugger;
+            //req.getApi("ssdd");
+            //req.getAppRes("XXX");
+            //req.getGlobalRes("CC");
+            //req.getRes("ddd");
+            req.getUser();
+            req.setUser({});
+            req.getViewPath();
             model.xxx="dasdsa";
             return {
                 post:function(data){

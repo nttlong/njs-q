@@ -24,6 +24,11 @@ function excutor(app,info){
         };
         requestExt(me,model,req,res);
         var info=pageReader.loadFile(req,res,me.info.file,me);
+        me.info.dirName=info.dirName;
+        me.info.fileName=info.fileName;
+        me.info.rootDir=info.rootDir;
+        me.info.relDir=info.relDir;
+        me.info.relFileName=info.relFileName;
         if(info.runner){
             var retFn = info.runner(model, req, res, next);
             if (retFn.load) {

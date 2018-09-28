@@ -1,0 +1,52 @@
+<html>
+    <head>
+        <script src="http://127.0.0.1:3000/test/static/jquery-3.3.1.min.js"></script>
+        <link href="<%- @getAppUrl()%>/static/test.css" rel="style/css">
+    </head>
+    
+    <body>
+        <%-@xxx %>
+        
+        <form name="testg" method="POST" role="form" id='test' enctype='multipart/form-data'>
+            <legend>Form title</legend>
+        
+            <div class="form-group">
+                <label for="">label</label>
+                <input type="text" name="test[0].xxx" class="form-control" id="" placeholder="Input field">
+            </div>
+        
+            
+        
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        <script>
+            $(function () {
+                
+            $('form').on('submit', function (e) {
+                console.log($('form').serialize());
+                e.preventDefault();
+
+                $.ajax({
+                    type: 'post',
+                    url: '<%- @getAppUrl()%>',
+                    data: $('form').serialize(),
+                    success: function (response) {
+                        debugger;
+                        //$('form')[0].reset();
+                       // $("#feedback").text(response);
+                        if(response=="True") {
+                            $('form')[0].reset();
+                            $("#feedback").text("Your information has been stored.");
+                        }
+                        else
+                            $("#feedback").text(" Some Error has occured Errror !!! ID duplicate");
+                    }
+                });
+
+            });
+
+        });
+
+        </script>
+    </body>
+</html>
