@@ -6,7 +6,7 @@ var path=require('path');
 var  router = express.Router();
 global["__list_of_apps__"]={};
 var executor=require("./executor");
-function create(appHostDir,appDir,router,app){
+function create(appHostDir,appDir,router,app,appServer){
     if (global["__list_of_apps__"][appDir]){
         return;
     }
@@ -17,7 +17,6 @@ function create(appHostDir,appDir,router,app){
     else {
         router.use("/static",express.static(path.sep.join(app.fullHostDir,'static')));
     }
-    
     urls =urls.sort(function(x,y){
         return x.url.length-y.url.length;
     });
@@ -35,8 +34,15 @@ function create(appHostDir,appDir,router,app){
 
         }
         var runUrl = url.replaceAll("$", "/:");
-        console.log(runUrl);
-        router.use(runUrl,executor(app,urls[i]));
+        var r=express.Router();
+        r.all(runUrl, executor(app, urls[i]));
+        if (appHostDir && appHostDir != "") {
+            router.use("/"+appHostDir,r);
+        }
+        else {
+            router.use("/", r);
+        }
+
     }
     global["__list_of_apps__"][appDir]=appDir;
     return;

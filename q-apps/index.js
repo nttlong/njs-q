@@ -104,7 +104,7 @@ function loadApp(appItem,app){
         }
     }
     else {
-        autoRoute.loadFromDir(appItem.hostDir, appItem.fullHostDir,router,appItem);
+        autoRoute.loadFromDir(appItem.hostDir, appItem.fullHostDir,router,appItem,app);
     }
 }
 function watchDir(dir){
@@ -118,10 +118,10 @@ function watchDir(dir){
         console.log("reload app at '"+dir+"'")
     });
     fs.watch(dir+path.sep+"views",function(e,f){
-        var reloadRouter=new expressRouteReLoad.ReloadRouter();
-        app.use(reloadRouter.handler());
+       // var reloadRouter=new expressRouteReLoad.ReloadRouter();
+        //app.use(reloadRouter.handler());
         loadApp(cache_watcher[dir]);
-        reloadRouter.reload([router]);
+        //reloadRouter.reload([router]);
         // app.use(router);
         console.log(cache_watcher[dir])
         console.log("reload app at '"+dir+"'")
@@ -209,10 +209,14 @@ function load(){
         // reloadRouter.reload([router]);
         
     });
-   
+    // app.get('*', function (req, res) {
+    //     res.send('what???', 404);
+    // });
+
     // app.use(router);
     
     global.___current_app___=app;
+    
     return app;
 
 }

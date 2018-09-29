@@ -20,7 +20,7 @@ function excutor(app,info){
     var me=this;
 
     me.exec=function(req,res,next){
-        
+        //var next=null;
         var model = {
             form:{}
         };
@@ -71,6 +71,10 @@ function excutor(app,info){
     count++;
 
 }
+var lst=[];
 module.exports=function(app,info){
-    return (new excutor(app,info)).exec;
-}
+    var ret = new excutor(app, info);
+    lst.push(ret);
+    ret.exec.owner=ret;
+    return ret.exec;
+};

@@ -10,7 +10,7 @@ app.sessionCacheUseMemCache(false);
 app.load(
     {
         name:"test",
-        hostDir:"",
+        hostDir:"test001",
         dir:"apps/test",
         isAutoRoute:true
     }

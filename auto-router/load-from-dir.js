@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path =require('path');
 var express = require('express');
-function loadFromDir(dir){
+function loadFromDir(dir,isSub){
     var ret=[];
     var lst=fs.readdirSync(dir);
     for(var i=0;i<lst.length;i++){
@@ -13,10 +13,11 @@ function loadFromDir(dir){
             
         }
         if (isFolder){
-            var _lst=loadFromDir(path.join(dir,item));
+            var _lst=loadFromDir(path.join(dir,item),isSub);
             for(var j=0;j<_lst.length;j++){
+                var subUrl = (_lst[j].url === "/" ? "" : _lst[j].url);
                 ret.push({
-                   url: lst[i]+"/"+(_lst[j].url==="/"?"":_lst[j].url),
+                    url: (subUrl == "") ? lst[i] : lst[i] +"/"+ subUrl,
                    file:_lst[j].file 
                 });
             }
@@ -24,7 +25,7 @@ function loadFromDir(dir){
         else {
             if(item==="index.html"){
                 ret.push({
-                    url:"/",
+                    url:"",// (isSub)?"": "/",
                     file:path.join(dir,item)
                 });
             }
@@ -44,12 +45,12 @@ function createRoute(hostDir,dir){
     var ret=[];
     for(var i=0;i<urls.length;i++){
         var _url=((urls[i].url==="/")?"":urls[i].url);
-        if(hostDir && hostDir!=""){
-            _url="/"+hostDir+"/"+_url;
-        }
-        else {
-            _url="/"+_url;
-        }
+        // if(hostDir && hostDir!=""){
+        //     _url="/"+hostDir+"/"+_url;
+        // }
+        // else {
+        //     _url="/"+_url;
+        // }
         ret.push({
             url:_url,
             file:urls[i].file
