@@ -46,7 +46,7 @@ function excutor(app,info){
         
         info.url=me.info.url;
         info.keyPath=trim(info.url,'/');
-        var ret = pageComipler.compiler(req,info, model);
+        var ret = pageComipler.compiler(me,req,info, model);
         
         res.set('Content-Type', 'text/html');
         res.send(ret);

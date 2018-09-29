@@ -8,9 +8,9 @@ var pageLockRuner=require("./page-lock-runner");
 var map={};
 var remap={};
 var rootDir=path.sep.join(path.dirname(require.main.filename),"temp");
-function compiler(req,info,model){
+function compiler(context,req,info,model){
       
-    var x=ECT;
+    
     var renderFile;
     if (map[req.getLanguage()] && map[req.getLanguage()][info.originFile]){
         info.renderFile = map[req.getLanguage()][info.originFile];
@@ -27,6 +27,10 @@ function compiler(req,info,model){
                     }
                     var items=info.keyPath.split('/');
                     var _rootDir=path.sep.join(rootDir,req.getLanguage());
+                    if (!fs.existsSync(_rootDir)) {
+                        fs.mkdirSync(_rootDir);
+                    }
+                _rootDir = path.sep.join(_rootDir, context.app.name);
                     if (!fs.existsSync(_rootDir)) {
                         fs.mkdirSync(_rootDir);
                     }
@@ -52,12 +56,14 @@ function compiler(req,info,model){
         });
 
     }
-    // var ECT = require('ect');
-
-    // var renderer = ECT();
-    // renderer.render.prototype.test = () => { };
+    if(require("../index").getIsCacheTemplate()){
+        nunjucks.configure('./', {
+            watch: true,
+            noCache: true
+        });
+    }
+    
     var html = sync.sync(render,[]);
-    //var html = renderer.render(info.renderFile, model);
     return html;
 }
 module.exports={

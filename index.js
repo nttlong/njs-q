@@ -1,4 +1,13 @@
+var _isTemplateCache=true;
+function setIsCacheTemplate(val){
+    _isTemplateCache=val;
+}
+function getIsCacheTemplate(val) {
+    return _isTemplateCache;
+}
 module.exports={
+    setIsCacheTemplate: setIsCacheTemplate,
+    getIsCacheTemplate: getIsCacheTemplate,
     api:require("./q-api"),
     apps:require("./q-apps"),
     datetime:require("./q-date-time"),

@@ -8,7 +8,9 @@ var pageGetContentServer=require("./page-get-server-script");
 var pageResolveClientStaticScript=require("./page-resolve-client-static-script");
 var pageServerFunctions=require("./page-server-functions");
 var pageLockRunner=require("./page-lock-runner");
+var pageAjax=require("./page-ajax");
 var chokidar = require('chokidar');
+var wacthCache={};
 var watcher = chokidar.watch('file, dir, or glob', {
     ignored: /[\/\\]\./, persistent: true
   });
@@ -108,6 +110,7 @@ function loadFile(req,res,file,context){
                 var ret=pageGetContentServer(content);
                 ret.content=pageResolveClientStaticScript(req,res,ret.content,context);
                 ret.content=pageServerFunctions(req,res,ret.content,context);
+                ret.content = pageAjax.commileApiClient(req, res, ret.content, context);
                 ret.resItems=languageInfo;
                 
                 ret.originFile=file;
@@ -121,12 +124,16 @@ function loadFile(req,res,file,context){
                 req.setViewPath(ret.relFileName);
                 ret = applyLanguage(req, languageInfo, ret, context);
                 var lang=req.getLanguage();
-                require('chokidar').watch(file,{}).on('change', function(path, stats) {
-                    var pageCompiler=require("./page-compiler");
-                    pageCompiler.clearCache();
-                    delete global[key][lang][path];
-                    if (stats) console.log('File', path, 'changed size to', stats.size);
-                });
+                if(!wacthCache[file]){
+                    require('chokidar').watch(file, {}).on('change', function (path, stats) {
+                        var pageCompiler = require("./page-compiler");
+                        pageCompiler.clearCache();
+                        delete global[key][lang][path];
+                        if (stats) console.log('File', path, 'changed size to', stats.size);
+                    });
+                    wacthCache[file]=file;
+                }
+                
                 if (!global[key][req.getLanguage()]){
                     global[key][req.getLanguage()] = {};
                 }

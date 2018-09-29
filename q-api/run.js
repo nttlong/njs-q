@@ -49,9 +49,9 @@ watcher.on('change', function(file, stat) {
         reload(require.cache[file])
     }
 });
-var _db=null
-var _cache={}
-var _cache_revert={}
+var _db=null;
+var _cache={};
+var _cache_revert={};
 function connect(url,collection){
     try {
         if(_db) return _db;

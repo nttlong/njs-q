@@ -20,9 +20,17 @@ String.prototype.join=function(){
         ret+=arguments[i]+this;
     }
     return ret.substring(0,ret.length-this.length);
-}
+};
 String.prototype.toPath=function(){
     var ret=this;
     ret=ret.replaceAll("/",path.sep).replaceAll("\\",path.sep);
     return ret;
-}
+};
+String.prototype.getRootDir=function(){
+    var path=require("path");
+    var ret= path.dirname(require.main.filename);
+    for(var i=0;i<arguments.length;i++){
+        ret += path.sep + arguments[i];
+    }
+    return ret;
+};
