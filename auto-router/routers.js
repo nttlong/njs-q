@@ -4,8 +4,12 @@ var express = require('express');
 var loader=require("./load-from-dir");
 var path=require('path');
 var  router = express.Router();
+global["__list_of_apps__"]={};
 var executor=require("./executor");
 function create(appHostDir,appDir,router,app){
+    if (global["__list_of_apps__"][appDir]){
+        return;
+    }
     var urls=loader(appHostDir,appDir);
     if(appHostDir && appHostDir!=""){
         router.use("/".join("",appHostDir,"static"),express.static(path.sep.join(app.fullHostDir,'static')));
@@ -15,7 +19,7 @@ function create(appHostDir,appDir,router,app){
     }
     
     urls =urls.sort(function(x,y){
-        return y.url.length-x.url.length;
+        return x.url.length-y.url.length;
     });
     for(var i=0;i<urls.length;i++){
         var x=new RegExp("\\"+path.sep+"index\\:.*\\.html");
@@ -34,6 +38,7 @@ function create(appHostDir,appDir,router,app){
         console.log(runUrl);
         router.use(runUrl,executor(app,urls[i]));
     }
+    global["__list_of_apps__"][appDir]=appDir;
     return;
 
 }

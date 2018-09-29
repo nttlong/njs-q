@@ -1,7 +1,7 @@
 require("../q-extension");
-var logger=require("../q-logger")(__filename)
-var expressRouteReLoad=require("express-route-reload");
-var reloader=new  expressRouteReLoad.ReloadRouter()
+var logger=require("../q-logger")(__filename);
+//var expressRouteReLoad=require("express-route-reload");
+//var reloader=new  expressRouteReLoad.ReloadRouter()
 var sesssionCache=require("./session-cache")
 var express = require('express');
 var cookieParser = require('cookie-parser');
@@ -24,7 +24,7 @@ var fs=require("fs");
 var cache_watcher={}
 var app=undefined;
 var autoRoute=require("./../auto-router"); 
-var reloadRouter=new expressRouteReLoad.ReloadRouter();
+//var reloadRouter=new expressRouteReLoad.ReloadRouter();
 /**
  * Get root directory where source is hosting
  */
@@ -109,10 +109,10 @@ function loadApp(appItem,app){
 }
 function watchDir(dir){
     fs.watchFile(dir+path.sep+"index.js",function(e,f){
-        var reloadRouter=new expressRouteReLoad.ReloadRouter();
-        app.use(reloadRouter.handler());
+       // var reloadRouter=new expressRouteReLoad.ReloadRouter();
+       // app.use(reloadRouter.handler());
         loadApp(cache_watcher[dir]);
-        reloadRouter.reload([router]);
+        //reloadRouter.reload([router]);
         // app.use(router);
         console.log(cache_watcher[dir])
         console.log("reload app at '"+dir+"'")
@@ -127,10 +127,10 @@ function watchDir(dir){
         console.log("reload app at '"+dir+"'")
     });
     fs.watchFile(dir+path.sep+"router.js",function(e,f){
-        var reloadRouter=new expressRouteReLoad.ReloadRouter();
-        app.use(reloadRouter.handler());
+       // var reloadRouter=new expressRouteReLoad.ReloadRouter();
+       // app.use(reloadRouter.handler());
         loadApp(cache_watcher[dir]);
-        reloadRouter.reload([router]);
+       // reloadRouter.reload([router]);
         // app.use(router);
         console.log(cache_watcher[dir]);
         console.log("reload app at '"+dir+"'");
@@ -158,7 +158,7 @@ function load(){
     }
     
     app = express();
-    app.use(reloadRouter.handler());
+    //app.use(reloadRouter.handler());
     router =express.Router();
     router.use('/site-static',express.static(__dirname+'/client'))
     app.use(cookieParser());

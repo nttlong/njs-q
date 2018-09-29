@@ -3,6 +3,8 @@ var pageComipler=require("./page-compiler");
 var requestExt=require("./request-ext");
 var requestPost=require("./request-post");
 var bodyParser = require("body-parser");
+var pageNunjuksExtent=require("./page-nunjucks-extent");
+var count=0;
 function trim(txt,c){
     while(txt[0]===c){
         txt=txt.substring(1,txt.length);
@@ -24,20 +26,32 @@ function excutor(app,info){
         };
         requestExt(me,model,req,res);
         var info=pageReader.loadFile(req,res,me.info.file,me);
+        
+        //var extentInfo=
         me.info.dirName=info.dirName;
         me.info.fileName=info.fileName;
         me.info.rootDir=info.rootDir;
         me.info.relDir=info.relDir;
         me.info.relFileName=info.relFileName;
+        me.info.extentInfo = info.extentInfo;
         //require("./page-language").syncLanguage(req,me.info.resItems);
+        var extentFn={
+            load:function(){},
+            post:function(){}
+        };
+        if(info.extentInfo && info.extentInfo.runner){
+            extentFn = info.extentInfo.runner(model, req, res, next);
+        }
         if(info.runner){
             var retFn = info.runner(model, req, res, next);
             if (retFn.load) {
-                retFn.load();
+               extentFn.load();
+               retFn.load();
             }
             if(req.body){
                 var data=requestPost(req,res,next);
                  if (retFn.post){
+                     extentFn.load(req.postData);
                     retFn.post(req.postData);
                     
                 }
@@ -49,9 +63,12 @@ function excutor(app,info){
         var ret = pageComipler.compiler(me,req,info, model);
         
         res.set('Content-Type', 'text/html');
-        res.send(ret);
+        res.end(ret);
+        //res.send(ret);
         //var x=req;
-    }
+    };
+    me.exec.__count__=count;
+    count++;
 
 }
 module.exports=function(app,info){
