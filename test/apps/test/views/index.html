@@ -1,27 +1,16 @@
 {% extends "base.html" %}
-<html>
-<head>
-<title>
-res:(chi la test thoi)
-</title>
-    <script src="../static/jquery-3.3.1.min.js" static></script>
-    <script src="../static/jquery32131321.js" static></script>
-    
-</head>
-<body>
 <script server>
     (function(model,req,res,next){
         debugger;
-        var x="res:(Thử số 1)";
-        var y="res::(Thử số 2)";
-        var x="res::(Thử số 3)";
+        model.test="dasdad";
         return {
 
         }
-    })
+    });
 </script>
 <script>
     var x= "page://api/test";
-
-</body>
-<html>
+</script>
+{% block content %}
+  <p>{$test}!</p>
+{% endblock %}

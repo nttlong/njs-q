@@ -72,8 +72,32 @@ function compiler(context,req,info,model){
             "".getRootDir("temp", req.getLanguage(), context.app.name), 
             {
             watch: true,
-            noCache: true
+            noCache: true,
+            tags: {
+                blockStart: '{%',
+                blockEnd: '%}',
+                variableStart: '{$',
+                variableEnd: '}',
+                commentStart: '{#',
+                commentEnd: '#}'
+            }
         });
+    }
+    else {
+        nunjucks.configure(
+            "".getRootDir("temp", req.getLanguage(), context.app.name),
+            {
+                watch: true,
+                noCache: false,
+                tags: {
+                    blockStart: '{%',
+                    blockEnd: '%}',
+                    variableStart: '{$',
+                    variableEnd: '}',
+                    commentStart: '{#',
+                    commentEnd: '#}'
+                }
+            });
     }
     
     var html = sync.sync(render,[]);
