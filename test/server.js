@@ -1,4 +1,6 @@
 var q = require("../index");
+var cnn = "mongodb://root:123456@localhost/hrm";
+q.language.setConfig(cnn,"sys_language");
 var app = q.apps;
 app.setSecretKey("sas03udh74327%$63283");
 app.setCacheMode(true);

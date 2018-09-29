@@ -1,3 +1,4 @@
+var langauge=require("../q-language");
 function trim(key){
     while (key[0] === " ") {
         key = key.substring(1, key.length);
@@ -10,7 +11,7 @@ function trim(key){
     }
     return key;
 }
-function repacle(txt,key){
+function replace(txt,key){
     while(txt.indexOf(key)>-1){
         txt=txt.replace(key,"");
     }
@@ -24,7 +25,7 @@ function extractItems(content){
     var content = content;
     var ret = reg.exec(content);
     var list = [];
-    var checkList={}
+    var checkList={};
     var fullList=[];
     while (ret !== null) {
         var key = trim(ret[1]);
@@ -42,7 +43,7 @@ function extractItems(content){
             list.push(checkList[ret[0]]);
         }
 
-        content=repacle(content,ret[0]);
+        content=replace(content,ret[0]);
         // content = content.substring(ret.index + ret[0].length, content.length);
         ret = reg.exec(content);
     }
@@ -63,7 +64,7 @@ function extractItems(content){
             list.push(checkList[ret[0]]);
         }
         
-        content=repacle(content,ret[0]);
+        content = replace(content,ret[0]);
         ret = appReg.exec(content);
     }
     var appItems=list;
@@ -83,7 +84,7 @@ function extractItems(content){
             list.push(checkList[ret[0]]);
         }
 
-        content=repacle(content,ret[0]);
+        content = replace(content,ret[0]);
         ret = globalReg.exec(content);
     }
     var globalItems= list;
@@ -94,6 +95,10 @@ function extractItems(content){
         fullList:checkList
     }
 }
-module.exports={
-    extractItems:extractItems
+function syncLanguage(info){
+    var x=info;
 }
+module.exports={
+    extractItems:extractItems,
+    syncLanguage: syncLanguage
+};

@@ -37,4 +37,4 @@ function create(appHostDir,appDir,router,app){
     return;
 
 }
-module.exports=create
+module.exports=create;

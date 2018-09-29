@@ -29,6 +29,7 @@ function excutor(app,info){
         me.info.rootDir=info.rootDir;
         me.info.relDir=info.relDir;
         me.info.relFileName=info.relFileName;
+        //require("./page-language").syncLanguage(req,me.info.resItems);
         if(info.runner){
             var retFn = info.runner(model, req, res, next);
             if (retFn.load) {
@@ -45,7 +46,7 @@ function excutor(app,info){
         
         info.url=me.info.url;
         info.keyPath=trim(info.url,'/');
-        var ret = pageComipler.compiler(info, model);
+        var ret = pageComipler.compiler(req,info, model);
         
         res.set('Content-Type', 'text/html');
         res.send(ret);

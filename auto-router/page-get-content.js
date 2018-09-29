@@ -1,5 +1,6 @@
 var key= "__${page-get-content}$__";
 global[key]={};
+var language=require("../q-language");
 var pageLanguage=require("./page-language");
 var fs=require('fs');
 var path=require("path")
@@ -11,7 +12,7 @@ var chokidar = require('chokidar');
 var watcher = chokidar.watch('file, dir, or glob', {
     ignored: /[\/\\]\./, persistent: true
   });
-function applyLanguage(languageInfo,info){
+function applyLanguage(req,languageInfo,info,context){
     var ret=info;
     var keys=Object.keys(languageInfo.fullList||{});
             for(var i=0;i<keys.length;i++){
@@ -20,25 +21,67 @@ function applyLanguage(languageInfo,info){
                 if(ret.script){
                     while(ret.script.indexOf('"'+key+'"')>-1){
                         if(item.level==1){
-                            ret.script=ret.script.replace('"'+key+'"','context.getRes("'+item.key+'")');
+                            var val = language.getItem(
+                                    req.getLanguage(),
+                                    context.app.name,
+                                    req.getViewPath(),
+                                    key,
+                                    item.value
+                                );
+                            ret.script = ret.script.replace('"' + key + '"','"'+val+'"');
                         }
                         if(item.level==2){
-                            ret.script=ret.script.replace('"'+key+'"','context.getAppRes("'+item.key+'")');
+                            var val = language.getItem(
+                                req.getLanguage(),
+                                context.app.name,
+                                "-",
+                                key,
+                                item.value
+                            );
+                            ret.script = ret.script.replace('"' + key + '"', '"' + val + '"');
                         }
                         if(item.level==3){
-                            ret.script=ret.script.replace('"'+key+'"','context.getGlobalRes("'+item.key+'")');
+                            var val = language.getItem(
+                                req.getLanguage(),
+                                "-",
+                                "-",
+                                key,
+                                item.value
+                            );
+                            ret.script = ret.script.replace('"' + key + '"', '"' + val + '"');
                         }
                     }
                 }
                 while(ret.content.indexOf(key)>-1){
                     if(item.level==1){
-                        ret.content=ret.content.replace(key,'<%- @getRes("'+item.key+'") %>');
+                        var val = language.getItem(
+                            req.getLanguage(),
+                            context.app.name,
+                            req.getViewPath(),
+                            key,
+                            item.value
+                        );
+                        ret.content = ret.content.replace(key, val);
                     }
                     if(item.level==2){
-                        ret.content=ret.content.replace(key,'<%- @getAppRes("'+item.key+'") %>');
+                        var val = language.getItem(
+                            req.getLanguage(),
+                            context.app.name,
+                            "-",
+                            key,
+                            item.value
+                        );
+                        ret.content = ret.content.replace(key, val);
                     }
                     if(item.level==3){
-                        ret.content=ret.content.replace(key,'<%- @getGlobalRes("'+item.key+'") %>');
+                        var val = language.getItem(
+                            req.getLanguage(),
+                            "-",
+                            "-",
+                            key,
+                            item.value
+                        );
+                        ret.content = ret.content.replace(key, val);
                     }
                 }
             }    
@@ -54,8 +97,8 @@ function applyLanguage(languageInfo,info){
     return ret;
 }
 function loadFile(req,res,file,context){
-    if(global[key][file]){
-        return global[key][file];
+    if (global[key][req.getLanguage()] && global[key][req.getLanguage()][file]){
+        return global[key][req.getLanguage()][file];
     }
     else {
         pageLockRunner(function(cb){
@@ -64,8 +107,9 @@ function loadFile(req,res,file,context){
                 var languageInfo= pageLanguage.extractItems(content);
                 var ret=pageGetContentServer(content);
                 ret.content=pageResolveClientStaticScript(req,res,ret.content,context);
-                ret.content=pageServerFunctions(req,res,ret.content,context)
-                ret =applyLanguage(languageInfo,ret,context);
+                ret.content=pageServerFunctions(req,res,ret.content,context);
+                ret.resItems=languageInfo;
+                
                 ret.originFile=file;
                 ret.fileName=path.basename(file);
                 ret.dirName=file.substring(0,file.length-ret.fileName-1);
@@ -74,13 +118,19 @@ function loadFile(req,res,file,context){
                 ret.relDir=ret.rootDir.substring(dir.length,ret.rootDir.length);
                 ret.relFileName=ret.relDir+path.sep+ret.fileName;
                 ret.viewPath=ret.rootDir+"/"+ret.fileName;
+                req.setViewPath(ret.relFileName);
+                ret = applyLanguage(req, languageInfo, ret, context);
+                var lang=req.getLanguage();
                 require('chokidar').watch(file,{}).on('change', function(path, stats) {
                     var pageCompiler=require("./page-compiler");
                     pageCompiler.clearCache();
-                    delete global[key][path];
+                    delete global[key][lang][path];
                     if (stats) console.log('File', path, 'changed size to', stats.size);
                 });
-                global[key][file]=ret;
+                if (!global[key][req.getLanguage()]){
+                    global[key][req.getLanguage()] = {};
+                }
+                global[key][req.getLanguage()][file]=ret;
                 cb(undefined,ret);
             } catch (error) {
                 cb(error);
@@ -88,7 +138,7 @@ function loadFile(req,res,file,context){
         });
         
     }
-    return global[key][file];
+    return global[key][req.getLanguage()][file];
 }
 function clearCacheFile(file){
     delete global[key][file]
