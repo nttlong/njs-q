@@ -14,6 +14,7 @@ function trim(txt,c){
     }
     return txt;
 }
+
 function excutor(app,info){
     this.app=app;
     this.info=info;
@@ -39,9 +40,19 @@ function excutor(app,info){
             load:function(){},
             post:function(){}
         };
-        if(info.extentInfo && info.extentInfo.runner){
-            extentFn = info.extentInfo.runner(model, req, res, next);
+        var runners=[];
+        var x = info.extentInfo;
+        while (x){
+            if(x.runner){
+                runners.push(x.runner);
+            }
+            
+            x=x.extentInfo;
         }
+        for(var i=runners.length-1;i>=0;i--){
+            runners[i](model, req, res, next);
+        }
+        
         if(info.runner){
             var retFn = info.runner(model, req, res, next);
             if (retFn.load) {

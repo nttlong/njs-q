@@ -39,10 +39,10 @@ function _compile(context, req, info, model){
     info.renderFile = _rootDir;
     map[req.getLanguage()][info.originFile] = _rootDir;
     if(info.extentInfo){
-        info.extentInfo.keyPath =(path.relative(
-            path.dirname(info.originFile),
+        info.extentInfo.keyPath = path.relative(
+            "".getRootDir(context.app.dir, "views"),
             path.dirname(info.extentInfo.originFile)
-            ));
+        );
         _compile(context, req, info.extentInfo, model);
     }
 }
