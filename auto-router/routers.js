@@ -43,8 +43,15 @@ function create(appHostDir,appDir,router,app,appServer){
                 executor(app, urls[i]));
         }
         else {
-            router.use("/"+runUrl, 
-                executor(app, urls[i]));
+            if(runUrl===""){
+                var r = express.Router();
+                r.all(runUrl, executor(app, urls[i]));
+                router.use("/", r);
+            }
+            else {
+                router.use("/"+runUrl, executor(app, urls[i]));
+            }
+            
         }
 
     }

@@ -46,13 +46,11 @@ function excutor(app,info){
             if(x.runner){
                 runners.push(x.runner);
             }
-            
             x=x.extentInfo;
         }
         for(var i=runners.length-1;i>=0;i--){
             runners[i](model, req, res, next);
         }
-        
         if(info.runner){
             var retFn = info.runner(model, req, res, next);
             if (retFn.load) {
@@ -68,11 +66,9 @@ function excutor(app,info){
                 }
              }
         }
-        
         info.url=me.info.url;
         info.keyPath=trim(info.url,'/');
         var ret = pageComipler.compiler(me,req,info, model);
-        
         res.set('Content-Type', 'text/html');
         res.end(ret);
         //res.send(ret);
