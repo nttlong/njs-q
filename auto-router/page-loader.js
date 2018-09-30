@@ -108,7 +108,7 @@ function loadFile(req, res, file, context) {
         ret.extentInfo  = loadFile(
                 req,
                 res,
-            path.join(path.dirname(file), extendFile), context);
+            path.join("".getRootDir(context.app.dir, "views"), extendFile), context);
     }
     ret.originFile = file;
     ret.fileName = path.basename(file);

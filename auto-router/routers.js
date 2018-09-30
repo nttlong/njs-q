@@ -20,6 +20,7 @@ function create(appHostDir,appDir,router,app,appServer){
     urls =urls.sort(function(x,y){
         return x.url.length-y.url.length;
     });
+    var r = express.Router();
     for(var i=0;i<urls.length;i++){
         var x=new RegExp("\\"+path.sep+"index\\:.*\\.html");
         var m=x.exec(urls[i].file);
@@ -34,16 +35,20 @@ function create(appHostDir,appDir,router,app,appServer){
 
         }
         var runUrl = url.replaceAll("$", "/:");
-        var r=express.Router();
-        r.all(runUrl, executor(app, urls[i]));
+        
+        // console.log(runUrl);
+        // r.all(runUrl, executor(app, urls[i]));
         if (appHostDir && appHostDir != "") {
-            router.use("/"+appHostDir,r);
+            router.all("/" + appHostDir+"/"+runUrl,
+                executor(app, urls[i]));
         }
         else {
-            router.use("/", r);
+            router.use("/"+runUrl, 
+                executor(app, urls[i]));
         }
 
     }
+    
     global["__list_of_apps__"][appDir]=appDir;
     return;
 

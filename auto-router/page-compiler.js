@@ -26,7 +26,7 @@ function _compile(context, req, info, model){
     }
     if (info.keyPath){
         var items = info.keyPath.split('/');
-        for (var i = 0; i < items.length - 1; i++) {
+        for (var i = 0; i < items.length; i++) {
             _rootDir = path.join(_rootDir, items[i]);
             if (!fs.existsSync(_rootDir)) {
                 fs.mkdirSync(_rootDir);
@@ -39,6 +39,10 @@ function _compile(context, req, info, model){
     info.renderFile = _rootDir;
     map[req.getLanguage()][info.originFile] = _rootDir;
     if(info.extentInfo){
+        info.extentInfo.keyPath =(path.relative(
+            path.dirname(info.originFile),
+            path.dirname(info.extentInfo.originFile)
+            ));
         _compile(context, req, info.extentInfo, model);
     }
 }

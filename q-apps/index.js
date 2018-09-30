@@ -109,20 +109,12 @@ function loadApp(appItem,app){
 }
 function watchDir(dir){
     fs.watchFile(dir+path.sep+"index.js",function(e,f){
-       // var reloadRouter=new expressRouteReLoad.ReloadRouter();
-       // app.use(reloadRouter.handler());
         loadApp(cache_watcher[dir]);
-        //reloadRouter.reload([router]);
-        // app.use(router);
         console.log(cache_watcher[dir])
         console.log("reload app at '"+dir+"'")
     });
     fs.watch(dir+path.sep+"views",function(e,f){
-       // var reloadRouter=new expressRouteReLoad.ReloadRouter();
-        //app.use(reloadRouter.handler());
         loadApp(cache_watcher[dir]);
-        //reloadRouter.reload([router]);
-        // app.use(router);
         console.log(cache_watcher[dir])
         console.log("reload app at '"+dir+"'")
     });
