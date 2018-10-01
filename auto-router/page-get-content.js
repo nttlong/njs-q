@@ -15,7 +15,7 @@ var chokidar = require('chokidar');
 var wacthCache={};
 var path = require("path");
 
-function loadFile(req,res,file,context){
+function loadFile(req,res,file,context,lockKey){
     if (global[key][req.getLanguage()] && global[key][req.getLanguage()][file]){
         return global[key][req.getLanguage()][file];
     }
@@ -32,7 +32,7 @@ function loadFile(req,res,file,context){
                 cb(error);
             }
             
-        });
+        },lockKey);
         
     }
     return global[key][req.getLanguage()][file];

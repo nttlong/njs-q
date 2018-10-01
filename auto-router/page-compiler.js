@@ -46,15 +46,21 @@ function _compile(context, req, info, model){
         );
         _compile(context, req, info.extentInfo, model);
     }
-    for(var i=0;i<info.includeInfo.length;i++){
-        info.includeInfo[i].keyPath = path.relative(
-            "".getRootDir(context.app.dir, "views"),
-            path.dirname(info.includeInfo[i].originFile)
-        );
-        _compile(context, req, info.includeInfo[i], model);
+    if(info.includeInfo){
+        for(var i=0;i<info.includeInfo.length;i++){
+            info.includeInfo[i].keyPath = path.relative(
+                "".getRootDir(context.app.dir, "views"),
+                path.dirname(info.includeInfo[i].originFile)
+            );
+            _compile(context, req, info.includeInfo[i], model);
+        }
     }
+    else {
+        var c=1;
+    }
+    
 }
-function compiler(context,req,info,model){
+function compiler(context,req,info,model,lockKey){
       
     
     var renderFile;
@@ -71,7 +77,7 @@ function compiler(context,req,info,model){
             } catch (error) {
                 cb(error);
             }
-        });
+        },lockKey);
     }
     function render(cb){
         nunjucks.render(info.renderFile, model, function (ex, res) {

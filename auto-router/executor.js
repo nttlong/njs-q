@@ -86,7 +86,7 @@ function excutor(app,info){
             return;
         }
         if(info.runner){
-            var retFn = info.runner(model, req, res, next);
+            var retFn = info.runner(model, req, res, next)||{};
             if(res.headersSent){
                 return;
             }
@@ -131,9 +131,12 @@ function excutor(app,info){
 
 }
 var lst=[];
-module.exports=function(app,info){
-    var ret = new excutor(app, info);
-    lst.push(ret);
-    ret.exec.owner=ret;
-    return ret.exec;
+module.exports={
+    handler:function(app,info){
+        var ret = new excutor(app, info);
+        lst.push(ret);
+        ret.exec.owner=ret;
+        return ret.exec;
+    },
+    execCode:execIncludeRunner
 };

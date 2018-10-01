@@ -129,6 +129,38 @@ function apply(context,model,req,res){
     var getApp=function(){
         return context.app
     }
+    var loadFile=function(file){
+        var path=require("path");
+        var p=require("./page-get-content");
+        var executor=require("./executor");
+        var compile=require("./page-compiler");
+        var c=context;
+        var fullFile="".getRootDir(context.app.dir,"views",file);
+        var renderInfo={
+            info:{
+                ajax:{},
+                ajaxKeys:[],
+                dirName:"",
+                extentInfo:undefined,
+                file:file,
+                relDir:"",
+                relFileName:"",
+                rootDir:"".getRootDir(),
+                url:context.url,
+                originFile:fullFile
+            },
+            app:context.app
+        };
+        var ret=p.loadFile(req,res,fullFile,renderInfo,fullFile);
+        var retModel={};
+        executor.execCode([ret],retModel,req,res);
+        var txt=compile.compiler(renderInfo,req,{
+            originFile:fullFile,
+            keyPath:path.dirname(file)
+        },retModel,fullFile);
+
+        return txt;
+    }
     var fnList=[
         getAbsUrl,
         getAbsUrl,
@@ -147,7 +179,8 @@ function apply(context,model,req,res){
         setViewPath,
         loadModule,
         redirect,
-        getApp
+        getApp,
+        loadFile
     ];
     for(var i=0;i<fnList.length;i++){
         model[fnList[i].name] = fnList[i];

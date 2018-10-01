@@ -45,11 +45,11 @@ function create(appHostDir,appDir,router,app,appServer){
         else {
             if(runUrl===""){
                 var r = express.Router();
-                r.all(runUrl, executor(app, urls[i]));
+                r.all(runUrl, executor.handler(app, urls[i]));
                 router.use("/", r);
             }
             else {
-                router.use("/"+runUrl, executor(app, urls[i]));
+                router.use("/"+runUrl, executor.handler(app, urls[i]));
             }
             
         }
