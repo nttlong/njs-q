@@ -119,6 +119,12 @@ function apply(context,model,req,res){
     var getFullUrl = function () {
         return req.getAppUrl(req.url.substring(1, req.url.length))
     };
+    var redirect=function(url){
+        res.redirect(url)
+    }
+    var getApp=function(){
+        return context.app
+    }
     var fnList=[
         getAbsUrl,
         getAbsUrl,
@@ -135,7 +141,9 @@ function apply(context,model,req,res){
         getViewPath,
         setUser,
         setViewPath,
-        loadModule
+        loadModule,
+        redirect,
+        getApp
     ];
     for(var i=0;i<fnList.length;i++){
         model[fnList[i].name] = fnList[i];
