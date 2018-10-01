@@ -27,9 +27,15 @@ function execIncludeRunner(list,model, req, res, next){
         }
         for(var j=runners.length-1;j>=0;j--){
             runners[j](model, req, res, next);
+            if(res.headersSent){
+                return;
+            }
         }
         if(info.runner){
             var retFn = info.runner(model, req, res, next);
+            if(res.headersSent){
+                return;
+            }
             if(info.includeInfo){
                 execIncludeRunner(info.includeInfo,model, req, res, next);
             }
@@ -76,25 +82,41 @@ function excutor(app,info){
             x=x.extentInfo;
         }
         execIncludeRunner(runners.reverse(),model, req, res, next);
-       
+        if(res.headersSent){
+            return;
+        }
         if(info.runner){
             var retFn = info.runner(model, req, res, next);
+            if(res.headersSent){
+                return;
+            }
             execIncludeRunner(info.includeInfo,model, req, res, next);
             if (retFn.load) {
                extentFn.load();
+               if(res.headersSent){
+                    return;
+                }
                retFn.load();
+               if(res.headersSent){
+                return;
+               }
             }
             if(req.body){
                 var data=requestPost(req,res,next);
                  if (retFn.post){
                      extentFn.load(req.postData);
                     retFn.post(req.postData);
-                    
+                    if(res.headersSent){
+                        return;
+                    }
                 }
              }
         }
         else {
             execIncludeRunner(info.includeInfo,model, req, res, next);
+            if(res.headersSent){
+                return;
+            }
         }
         info.url=me.info.url;
         info.keyPath=trim(info.url,'/');
