@@ -40,17 +40,17 @@ function apply(context,model,req,res){
         }
     };
     var getAppStatic = function (file) {
-        if (req.tenancyCode) {
-            if (me.app.hostDir) {
-                return getAbsUrl() + "/" + req.tenancyCode + "/" + me.app.hostDir + "/static/" + file;
+        if (context.tenancyCode) {
+            if (context.app.hostDir) {
+                return getAbsUrl() + "/" + req.tenancyCode + "/" + context.app.hostDir + "/static/" + file;
             }
             else {
                 return getAbsUrl() + "/" + req.tenancyCode + "/static/" + file;
             }
         }
         else {
-            if (me.app.hostDir) {
-                return getAbsUrl() + "/" + me.app.hostDir + "/static/" + file;
+            if (context.app.hostDir) {
+                return getAbsUrl() + "/" + context.app.hostDir + "/static/" + file;
             }
             else {
                 return getAbsUrl() + "/static/" + file;
