@@ -107,7 +107,11 @@ function apply(context,model,req,res){
     var loadModule = function (path) {
         if (path.substring(0, 2) == "./") {
             var PATH = require("path")
-            return require(PATH.parse(require.main.filename).dir + "/" + path);
+            return require("".getRootDir(path.substring(2,path.length)))
+        }
+        else if (path.substring(0, 2) == "~/") {
+            var PATH = require("path")
+            return require("".getRootDir(context.app.dir, path.substring(2,path.length)))
         }
         else {
             return require(path);
