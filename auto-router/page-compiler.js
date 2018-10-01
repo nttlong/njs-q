@@ -38,12 +38,20 @@ function _compile(context, req, info, model){
     fs.writeFileSync(_rootDir, info.content);
     info.renderFile = _rootDir;
     map[req.getLanguage()][info.originFile] = _rootDir;
+    
     if(info.extentInfo){
         info.extentInfo.keyPath = path.relative(
             "".getRootDir(context.app.dir, "views"),
             path.dirname(info.extentInfo.originFile)
         );
         _compile(context, req, info.extentInfo, model);
+    }
+    for(var i=0;i<info.includeInfo.length;i++){
+        info.includeInfo[i].keyPath = path.relative(
+            "".getRootDir(context.app.dir, "views"),
+            path.dirname(info.includeInfo[i].originFile)
+        );
+        _compile(context, req, info.includeInfo[i], model);
     }
 }
 function compiler(context,req,info,model){

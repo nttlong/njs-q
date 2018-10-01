@@ -14,7 +14,34 @@ function trim(txt,c){
     }
     return txt;
 }
-
+function execIncludeRunner(list,model, req, res, next){
+    for(var i=0;i<list.length;i++){
+        var info=list[i];
+        var x = info.extentInfo;
+        var runners=[];
+        while (x){
+            if(x.runner){
+                runners.push(x.runner);
+            }
+            x=x.extentInfo;
+        }
+        for(var j=runners.length-1;j>=0;j--){
+            runners[j](model, req, res, next);
+        }
+        if(info.runner){
+            var retFn = info.runner(model, req, res, next);
+            if(info.includeInfo){
+                execIncludeRunner(info.includeInfo,model, req, res, next);
+            }
+            
+        }
+        else {
+            if(info.includeInfo){
+                execIncludeRunner(info.includeInfo,model, req, res, next);
+            }
+        }
+    }
+}
 function excutor(app,info){
     this.app=app;
     this.info=info;
@@ -44,15 +71,15 @@ function excutor(app,info){
         var x = info.extentInfo;
         while (x){
             if(x.runner){
-                runners.push(x.runner);
+                runners.push(x);
             }
             x=x.extentInfo;
         }
-        for(var i=runners.length-1;i>=0;i--){
-            runners[i](model, req, res, next);
-        }
+        execIncludeRunner(runners.reverse(),model, req, res, next);
+       
         if(info.runner){
             var retFn = info.runner(model, req, res, next);
+            execIncludeRunner(info.includeInfo,model, req, res, next);
             if (retFn.load) {
                extentFn.load();
                retFn.load();
@@ -65,6 +92,9 @@ function excutor(app,info){
                     
                 }
              }
+        }
+        else {
+            execIncludeRunner(info.includeInfo,model, req, res, next);
         }
         info.url=me.info.url;
         info.keyPath=trim(info.url,'/');

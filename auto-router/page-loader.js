@@ -4,6 +4,7 @@ var key = "__${page-get-content}$__";
 var language = require("../q-language");
 var pageLanguage =require("./page-language");
 var pageNunjucksExtent=require("./page-nunjucks-extent");
+var pageNunjucksInclude=require("./page-nunjucks-include");
 var fs = require("fs");
 var pageGetContentServer = require("./page-get-server-script");
 var pageResolveClientStaticScript = require("./page-resolve-client-static-script");
@@ -97,6 +98,7 @@ function applyLanguage(req, languageInfo, info, context) {
 function loadFile(req, res, file, context) {
     var content = fs.readFileSync(file, "utf8");
     var extendFile = pageNunjucksExtent.getExtends(content);
+    var includeFiles=pageNunjucksInclude.getIncludes(content);
 
     var languageInfo = pageLanguage.extractItems(content);
     var ret = pageGetContentServer(content);
@@ -109,6 +111,15 @@ function loadFile(req, res, file, context) {
                 req,
                 res,
             path.join("".getRootDir(context.app.dir, "views"), extendFile), context);
+            var test=1;
+    }
+    ret.includeInfo=[];
+    for(var i=0;i<includeFiles.length;i++){
+        ret.includeInfo.push(loadFile(
+            req,
+            res,
+            path.join("".getRootDir(context.app.dir, "views"), includeFiles[i]), context)
+        )
     }
     ret.originFile = file;
     ret.fileName = path.basename(file);
