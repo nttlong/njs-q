@@ -88,8 +88,8 @@ function compiler(context,req,info,model){
             tags: {
                 blockStart: '{%',
                 blockEnd: '%}',
-                variableStart: '{$',
-                variableEnd: '}',
+                variableStart: '{(',
+                variableEnd: ')}',
                 commentStart: '{#',
                 commentEnd: '#}'
             }
@@ -104,8 +104,8 @@ function compiler(context,req,info,model){
                 tags: {
                     blockStart: '{%',
                     blockEnd: '%}',
-                    variableStart: '{$',
-                    variableEnd: '}',
+                    variableStart: '{(',
+                    variableEnd: ')}',
                     commentStart: '{#',
                     commentEnd: '#}'
                 }
