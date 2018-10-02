@@ -31,7 +31,7 @@ function unescapeSpecial(content){
         content=content.replace("\\"+escape("("),"(");
     }
     while(content.indexOf("\\"+escape(")"))>-1){
-        content=content.replace("\\"+escape(")"),")",);
+        content=content.replace("\\"+escape(")"),")");
     }    
     return content;
 }
