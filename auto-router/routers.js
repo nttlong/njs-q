@@ -40,7 +40,7 @@ function create(appHostDir,appDir,router,app,appServer){
         // r.all(runUrl, executor(app, urls[i]));
         if (appHostDir && appHostDir != "") {
             router.all("/" + appHostDir+"/"+runUrl,
-                executor(app, urls[i]));
+                executor.handler(app, urls[i]));
         }
         else {
             if(runUrl===""){
