@@ -23,7 +23,10 @@ function loadHtml(appName,language,file){
                 if(ret.script){
                     ret.fn=eval(ret.script);
                 }
-                
+                require('chokidar').watch(file, {}).on('change', function (path, stats) {
+                    delete cache[language][file]
+                    if (stats) console.log('File', path, 'changed size to', stats.size);
+                });
                 var keys=Object.keys(info.fullList);
                 for(var i=0;i<keys.length;i++){
                     var key=keys[i];
