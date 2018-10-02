@@ -78,11 +78,11 @@
  6- Built-in model function use in Django template:
  ==========================
  
-    1- getRes(key,value): sync with mongodb language resource and get value of view in app.
+    1- getRes(key [,value]): sync with mongodb language resource and get value of view in app.
      
-    2- getAppRes(key,value): sync with mongodb language resource and get value of app.
+    2- getAppRes(key [,value]): sync with mongodb language resource and get value of app.
     
-    3- getGlobalRes(key,value): sync with mongodb language resource and get value of global.
+    3- getGlobalRes(key [,value]): sync with mongodb language resource and get value of global.
     
     4- getAppStatic(fileName): write to client a url of static resource in app.
     
@@ -90,4 +90,21 @@
     
     6- getAppUrl(): get app url.
     
+    7- loadHtml({rel File path from views directory of app}): load and render an Html file template in view directory of app.
     
+ 
+ 7- Template short cut syntax:
+ ============================
+    
+    Some built-in function in model have been rewrite as short term words,see below list:
+        
+        
+        -   getRes(key) -> res:(key)
+        
+        -   getAppRes(key) => res::(key)
+        
+        -   getGlobalRes(key) => res:::(key)
+        
+        
+        
+ 
