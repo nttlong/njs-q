@@ -93,7 +93,7 @@
     7- loadHtml({rel File path from views directory of app}): load and render an Html file template in view directory of app.
     
  
- 7- Template short cut syntax:
+ 7- Template shortcut syntax:
  ============================
     
     Some built-in function in model have been rewrite as short term words,see below list:
