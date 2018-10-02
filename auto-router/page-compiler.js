@@ -91,6 +91,7 @@ function compiler(context,req,info,model,lockKey){
             {
             watch: true,
             noCache: true,
+            autoEscape:false, 
             tags: {
                 blockStart: '{%',
                 blockEnd: '%}',
@@ -107,6 +108,7 @@ function compiler(context,req,info,model,lockKey){
             {
                 watch: true,
                 noCache: false,
+                autoEscape:false,
                 tags: {
                     blockStart: '{%',
                     blockEnd: '%}',

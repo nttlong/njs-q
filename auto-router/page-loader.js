@@ -101,7 +101,7 @@ function loadFile(req, res, file, context) {
     var includeFiles=pageNunjucksInclude.getIncludes(content);
 
     var languageInfo = pageLanguage.extractItems(content);
-    var ret = pageGetContentServer(content);
+    var ret = pageGetContentServer(languageInfo.content);
     ret.content = pageResolveClientStaticScript(req, res, ret.content, context);
     ret.content = pageServerFunctions(req, res, ret.content, context);
     ret.content = pageAjax.commileApiClient(req, res, ret.content, context);

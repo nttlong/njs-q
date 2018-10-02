@@ -129,6 +129,14 @@ function apply(context,model,req,res){
     var getApp=function(){
         return context.app
     }
+    var loadHtml=function(file){
+        var pageLoaderHtml=require("./page-loader-html");
+        var ret=pageLoaderHtml.loadHtml(context.app.name, req.getLanguage(), "".getRootDir(
+            context.app.dir,"views",file 
+        ))
+        var retHtml= pageLoaderHtml.compile(context,ret,req,res);
+        return retHtml;
+    }
     var loadFile=function(file){
         var path=require("path");
         var p=require("./page-get-content");
@@ -180,7 +188,8 @@ function apply(context,model,req,res){
         loadModule,
         redirect,
         getApp,
-        loadFile
+        // loadFile,
+        loadHtml
     ];
     for(var i=0;i<fnList.length;i++){
         model[fnList[i].name] = fnList[i];

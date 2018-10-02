@@ -17,7 +17,27 @@ function replace(txt,key){
     }
     return txt;
 }
+function escapeSpecial(content){
+    while(content.indexOf("\\(")>-1){
+        content=content.replace("\\(","\\"+escape("("));
+    }
+    while(content.indexOf("\\)")>-1){
+        content=content.replace("\\)","\\"+escape(")"));
+    }    
+    return content;
+}
+function unescapeSpecial(content){
+    while(content.indexOf("\\"+escape("("))>-1){
+        content=content.replace("\\"+escape("("),"(");
+    }
+    while(content.indexOf("\\"+escape(")"))>-1){
+        content=content.replace("\\"+escape(")"),")",);
+    }    
+    return content;
+}
 function extractItems(content){
+    var _content=escapeSpecial(content);
+    content=_content;
     var reg = /res:\(([^()]+)\)/;
     var appReg = /res::\(([^()]+)\)/;
     var globalReg = /res:::\(([^()]+)\)/;
@@ -31,11 +51,11 @@ function extractItems(content){
         var key = trim(ret[1]);
         
         key = escape(key.toLowerCase());
-
+        var resVal=ret[1];
         if(!checkList[ret[0]]){
             checkList[ret[0]]={
                 full: ret[0],
-                value: ret[1],
+                value: unescapeSpecial(ret[1]),
                 key: key,
                 index: ret.index,
                 level:1
@@ -56,14 +76,13 @@ function extractItems(content){
         if(!checkList[ret[0]]){
             checkList[ret[0]]={
                 full: ret[0],
-                value: ret[1],
+                value: unescapeSpecial(ret[1]),
                 key: key,
                 index: ret.index,
                 level:2
             };
             list.push(checkList[ret[0]]);
         }
-        
         content = replace(content,ret[0]);
         ret = appReg.exec(content);
     }
@@ -76,7 +95,7 @@ function extractItems(content){
         if(!checkList[ret[0]]){
             checkList[ret[0]]={
                 full: ret[0],
-                value: ret[1],
+                value: unescapeSpecial(ret[1]),
                 key: key,
                 index: ret.index,
                 level:3
@@ -92,7 +111,8 @@ function extractItems(content){
         items:pageItems,
         appItems:appItems,
         globalItems:globalItems,
-        fullList:checkList
+        fullList:checkList,
+        content:_content
     }
 }
 function syncLanguage(info){
