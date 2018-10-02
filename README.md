@@ -45,7 +45,8 @@
       
  3- Parameterize a route handler according to file name:
  
-        The "$" in html view filename will translate into ":" in Expressjs. For below example users$userId.html will generate route like this:
+        The "$" in html view filename will translate into ":" in Expressjs. 
+        For above example users$userId.html will generate route like this:
         "systems/users:userId"
  4 - Server code script tags:
  
