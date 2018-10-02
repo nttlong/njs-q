@@ -23,5 +23,11 @@ module.exports={
     sys:require("./q-system"),
     textFornat:require("./q-text-format"),
     view_define:require("./q-view"),
-    controller:require("./q-controller")
+    controller: require("./q-controller"),
+    setRootDir: function(path) {
+        global.__rootDir = path;
+    },
+    getRootDir: function(){
+        return global.__rootDir;
+    }
 }
