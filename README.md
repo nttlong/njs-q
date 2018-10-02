@@ -92,6 +92,12 @@
     
     7- loadHtml({rel File path from views directory of app}): load and render an Html file template in view directory of app.
     
+    8 - loadModule(abs path|rel path | rel app path): load Module by path: 
+        
+        if path start with ~/ the function will load moddule from root project.
+        
+        if path start with ./ the function will load moddule from root app in project.
+    
  
  7- Template shortcut syntax:
  ============================
