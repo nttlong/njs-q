@@ -88,7 +88,8 @@ function excutor(app,info){
         if(info.runner){
             var retFn = info.runner(model, req, res, next)||{};
             if(req.header("AJAX-POST") && retFn.ajax && retFn.ajax[req.header("AJAX-POST") ]){
-                var retJSON=retFn.ajax[req.header("AJAX-POST") ](req.postData);
+                var jsonData=require("../q-json").fromJSON(req.body);
+                var retJSON=retFn.ajax[req.header("AJAX-POST") ](jsonData);
                 res.end(JSON.stringify(retJSON||{}));
                 return;
             }
