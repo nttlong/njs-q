@@ -87,6 +87,11 @@ function excutor(app,info){
         }
         if(info.runner){
             var retFn = info.runner(model, req, res, next)||{};
+            if(req.header("AJAX-POST") && retFn.ajax && retFn.ajax[req.header("AJAX-POST") ]){
+                var retJSON=retFn.ajax[req.header("AJAX-POST") ](req.postData);
+                res.end(JSON.stringify(retJSON||{}));
+                return;
+            }
             if(res.headersSent){
                 return;
             }
@@ -121,8 +126,11 @@ function excutor(app,info){
         info.url=me.info.url;
         info.keyPath=trim(info.url,'/');
         var ret = pageComipler.compiler(me,req,info, model);
-        res.set('Content-Type', 'text/html');
-        res.end(ret);
+        if(!res.headersSent){
+            res.set('Content-Type', 'text/html');
+            res.end(ret);
+        }
+        
         //res.send(ret);
         //var x=req;
     };

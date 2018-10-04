@@ -77,9 +77,22 @@ function compile(context,info,req,res,next){
         }
     });
     if(info.fn){
-        info.fn(model,req,res,next);
+        var ret=info.fn(model,req,res,next);
+        if(req.header("AJAX-POST")){
+            if(ret.ajax && ret.ajax[req.header("AJAX-POST")]){
+                var resData=ret.ajax[req.header("AJAX-POST")](req.postData)||{};
+                res.end(JSON.stringify(resData));
+                
+            }
+        }
     }
-    return nunjucks.renderString(info.content,model);
+    if(!res.headersSent){
+        return nunjucks.renderString(info.content,model);
+    }
+    else {
+        return undefined;
+    }
+    
 }
 module.exports={
     loadHtml:loadHtml,
