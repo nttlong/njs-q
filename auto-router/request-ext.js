@@ -8,6 +8,25 @@ var caching={};
 var session_caching={}
 var logger=require("../q-logger")(__filename);
 var sessionCache=require("../q-apps/session-cache");
+var chokidar=require("chokidar")
+var cacheWatch={}
+function wacth_module(moduleFullPath) {
+    if(!cacheWatch[moduleFullPath]){
+        chokidar.watch(
+            moduleFullPath,
+                {
+                    ignoreInitial: true, 
+                    ignored: /^\./, 
+                    persistent: true
+                }
+            ).on('add',function(path){
+                delete require.cache[path];
+            }).on('change',function(path){
+                delete require.cache[path];
+            });
+            cacheWatch[moduleFullPath]=moduleFullPath;
+    }
+}
 function apply(context,model,req,res){
     
     if (!req.__abs_url__) {
@@ -106,15 +125,25 @@ function apply(context,model,req,res){
     };
     var loadModule = function (path) {
         if (path.substring(0, 2) == "./") {
+            var moduleFullPath="".getRootDir(path.substring(2,path.length));
             var PATH = require("path")
-            return require("".getRootDir(path.substring(2,path.length)))
+            var ret= require(moduleFullPath);
+            wacth_module(moduleFullPath);
+            
+            return ret;
+            
         }
         else if (path.substring(0, 2) == "~/") {
-            var PATH = require("path")
-            return require("".getRootDir(context.app.dir, path.substring(2,path.length)))
+            var PATH = require("path");
+            var moduleFullPath="".getRootDir(context.app.dir, path.substring(2,path.length));
+            var ret= require(moduleFullPath);
+            wacth_module(moduleFullPath);
+            return ret;
         }
         else {
-            return require(path);
+            var ret= require(path);
+            wacth_module(path);
+            return ret;
         }
     };
     var getApi = function (path) {
