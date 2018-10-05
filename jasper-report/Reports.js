@@ -14,7 +14,7 @@ Reports.prototype.run=function(pathToReport,format, cb){
     function run(cb){
         try {
             request.get({
-                url:me.owner.url+"/rest_v2/users/reports/"+encodeURI(pathToReport)+"."+format,
+                url:me.owner.url+"/rest_v2/reports/reports/"+pathToReport+"."+format+"?format="+format,
                 'auth': me.owner.__getAuth(),
                 json: true,
               },function(ex,res){
@@ -34,12 +34,17 @@ Reports.prototype.run=function(pathToReport,format, cb){
         return sync.sync(run,[]);
     }
 };
-Reports.prototype.get=function(userId, cb){
+/**
+ * Finding Running Reports
+ * @param {*} userId 
+ * @param {*} cb 
+ */
+Reports.prototype.findRunning=function(pathToReport, cb){
     var me=this;
     function run(cb){
         try {
             request.get({
-                url:me.owner.url+"/rest_v2/users/"+userId,
+                url:me.owner.url+"/rest_v2/users/reports/"+encodeURI(pathToReport),
                 'auth': me.owner.__getAuth(),
                 json: true,
               },function(ex,res){

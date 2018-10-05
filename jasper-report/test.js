@@ -4,12 +4,20 @@ var x=require("./index").jasper(
     "jasperadmin"
     );
 try {
-    var lst=x.reports.run("danhsachnhanvien","html");    
-    console.log(lst);
+    var lst=x.reports.run("Danh_sach_nhan_vien","pdf");    
+    var fs=require("fs");
+    fs.writeFileSync("test001.pdf",lst,"binary");
+    // sconsole.log(lst);
+    // var r=x.repository.search({
+    //      q:"danh"
+    // });
 } catch (error) {
     console.error(error);
 }
-
+//var r=x.reports.findRunning("danhsachnhanvien");
+// var fs=require("fs");
+// fs.writeFileSync("test.html",r,"utf-8");
+// console.log(r)
 
 // try {
 //     var ret=x.users.createOrModify({
