@@ -4,9 +4,13 @@ var x=require("./index").jasper(
     "jasperadmin"
     );
 try {
-    var lst=x.reports.run("Danh_sach_nhan_vien","html");    
-    var fs=require("fs");
-    fs.writeFileSync("test001.html",lst,"binary");
+    var lst=x.repository.search({
+        type:"reportUnit"
+    });
+    var y=lst;
+    // var lst=x.reports.run("Danh_sach_nhan_vien","html");    
+    // var fs=require("fs");
+    // fs.writeFileSync("test001.html",lst,"binary");
     // sconsole.log(lst);
     // var r=x.repository.search({
     //      q:"danh"

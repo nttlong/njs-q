@@ -14,7 +14,7 @@ Reports.prototype.run=function(pathToReport,format, cb){
     function run(cb){
         try {
             request.get({
-                url:me.owner.url+"/rest_v2/reports/reports/"+pathToReport+"."+format+"?format="+format,
+                url:me.owner.url+"/rest_v2/reports/"+pathToReport+"."+format+"?format="+format,
                 'auth': me.owner.__getAuth(),
                 json: true,
               },function(ex,res){
