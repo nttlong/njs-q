@@ -3,7 +3,14 @@ var x=require("./index").jasper(
     "jasperadmin",
     "jasperadmin"
     );
-var lst=x.roles.find();
+try {
+    var lst=x.reports.run("danhsachnhanvien","html");    
+    console.log(lst);
+} catch (error) {
+    console.error(error);
+}
+
+
 // try {
 //     var ret=x.users.createOrModify({
 //         username:"nttlong",

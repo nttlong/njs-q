@@ -21,11 +21,7 @@ function wacth_module(moduleFullPath) {
                 }
             ).on('add',function(path){
                 delete require.cache[path];
-            })
-            .on('unlink',function(path){
-                delete require.cache[path];
-            })
-            .on('change',function(path){
+            }).on('change',function(path){
                 delete require.cache[path];
             });
             cacheWatch[moduleFullPath]=moduleFullPath;
