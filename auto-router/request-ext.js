@@ -9,7 +9,7 @@ var session_caching={}
 var logger=require("../q-logger")(__filename);
 var sessionCache=require("../q-apps/session-cache");
 var chokidar=require("chokidar")
-var cacheWatch={}
+var cacheWatch={};
 function wacth_module(moduleFullPath) {
     if(!cacheWatch[moduleFullPath]){
         chokidar.watch(
@@ -150,7 +150,7 @@ function apply(context,model,req,res){
         return api.getKey(context.app.hostDir + "@" + path)
     };
     var getFullUrl = function () {
-        return req.getAppUrl(req.url.substring(1, req.url.length))
+        return req.getAbsUrl() + req.url;
     };
     var redirect=function(url){
         res.redirect(url)
