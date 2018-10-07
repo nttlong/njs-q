@@ -131,12 +131,13 @@ function watchDir(dir){
         // });
     });
 }
+var apps;
 /**
  * Get list of application
  * @param {List of application} apps 
  */
 function load(){
-    var apps;
+   
     if(arguments.length==1 &&
        arguments[0] instanceof Array ){
         apps=arguments[0];
@@ -337,6 +338,9 @@ module.exports={
     sessionCacheSetServers:sesssionCache.sessionCacheSetServers,
     sessionCacheSet:sesssionCache.sessionCacheSet,
     sessionCacheUseMemCache:sesssionCache.setIsUseMemCache,
-    createAppRoutes:createAppRoutes
+    createAppRoutes:createAppRoutes,
+    getApp:function(){
+        return app;
+    }
 
 }
