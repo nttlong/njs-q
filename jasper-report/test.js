@@ -5,14 +5,17 @@ var x=require("./index").jasper(
     );
 var q=require("./index");
 try {
-    var info=q.createReportInfo();
-    info.uri="reports/Danh_sach_nhan_vien2"
-    info.dataSourcePath="/datasources/lms";
-    info.fileName="/home/hcsadmin/source/nodejs/quicky/jasper-report/Exp_DanhSachNhanVien.jrxml";
-    info.label="long_test_001";
-    var r=x.resource.publishReport(info);
-    var r=x.resource.getInfo("reports/Danh_sach_nhan_vien")
-    console.log(r)
+    // var info=q.createReportInfo();
+    // info.uri="reports/Danh_sach_nhan_vien3"
+    // info.dataSourcePath="/datasources/lms2";
+    // info.fileName="/home/hcsadmin/source/nodejs/quicky/jasper-report/Exp_DanhSachNhanVien.jrxml";
+    // info.label="long_test_001";
+    // var r=x.resource.publishReport(info);
+    // var r=x.resource.getInfo("reports/Danh_sach_nhan_vien")
+    var f=q.filter.create();
+    f.setType(q.filter.resourceTypes.customDataSource);
+    var r=x.resource.search(f);
+    console.log(r);
     // var f=require("./index").filter.create();
     // // f.setSearch("XXX");
     // f.setType(q.filter.resourceTypes.query);
