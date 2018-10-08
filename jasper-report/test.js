@@ -3,11 +3,31 @@ var x=require("./index").jasper(
     "jasperadmin",
     "jasperadmin"
     );
+var q=require("./index");
 try {
-    var lst=x.repository.search({
-        type:"reportUnit"
-    });
-    var y=lst;
+    var info=q.createReportInfo();
+    info.uri="reports/Danh_sach_nhan_vien2"
+    info.dataSourcePath="/datasources/lms";
+    info.fileName="/home/hcsadmin/source/nodejs/quicky/jasper-report/Exp_DanhSachNhanVien.jrxml";
+    info.label="long_test_001";
+    var r=x.resource.publishReport(info);
+    var r=x.resource.getInfo("reports/Danh_sach_nhan_vien")
+    console.log(r)
+    // var f=require("./index").filter.create();
+    // // f.setSearch("XXX");
+    // f.setType(q.filter.resourceTypes.query);
+    // var lst=x.resource.search();
+    // var info=q.createFolderInfo();
+    // info.uri="test001/test002/test003";
+    // info.description="Long thực hiện test";
+    // info.label="Thử  Report"
+    // var lst=x.resource.createFolder(info);
+    // console.log(lst);
+    // console.log(f.toString())
+    // var lst=x.repository.search({
+    //     type:"reportUnit"
+    // });
+    // var y=lst;
     // var lst=x.reports.run("Danh_sach_nhan_vien","html");    
     // var fs=require("fs");
     // fs.writeFileSync("test001.html",lst,"binary");
@@ -16,7 +36,7 @@ try {
     //      q:"danh"
     // });
 } catch (error) {
-    console.error(error);
+    console.error(error.message);
 }
 //var r=x.reports.findRunning("danhsachnhanvien");
 // var fs=require("fs");

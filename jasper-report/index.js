@@ -65,5 +65,12 @@ module.exports={
     jasper:function(url,username,pasword){
         var Jasper=require("./core");
         return new Jasper(url,username,pasword);
+    },
+    filter:require("./filter"),
+    createReportInfo:require("./reportInfo").create,
+    FolderInfo:require("./FolderInfo"),
+    createFolderInfo:function(){
+        var info=require("./FolderInfo");
+        return new info()
     }
 }

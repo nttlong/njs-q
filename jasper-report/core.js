@@ -3,6 +3,7 @@ var Users=require("./users");
 var Roles=require("./roles");
 var Reports=require("./Reports");
 var Repository=require("./Repository");
+var Resource=require("./resources");
 var sync=require("./sync");
 function Jasper(url,username,password){
     this.username=username;
@@ -12,6 +13,7 @@ function Jasper(url,username,password){
     this.roles=new Roles(this);
     this.reports =new Reports(this);
     this.repository =new Repository(this);
+    this.resource=new Resource(this);
     
 };
 Jasper.prototype.__getAuth=function(){
