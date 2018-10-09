@@ -4,6 +4,7 @@ global.__mongoose_models__={}
 global.__mongoose_coll_models__={}
 global.__mongoose_models_require_fields__={}
 global.__mongodb_schema_validators__={}
+global.__mongodb_indexes__={}
 var map_bsonTypes={
     "double":Number,
     "string":String	, 
@@ -25,6 +26,7 @@ function createSchema(obj){
     var ret={}
     for(var i=0;i<keys.length;i++){
         var val=obj[keys[i]]
+        
         if(typeof val=="string"){
             val = map_bsonTypes[val];
             if(!val){
@@ -166,14 +168,24 @@ function getProperties(obj){
     }
     return ret;
 }
-function schema(name,collectionName,fields){
+function FieldInfo(){
+    this.required=false;
+    this.bsonType="";
+    this.description=""
+}
+/**
+ * 
+ * @param {string} collectionName 
+ * @param {[x:FieldInfo]:FieldInfo} fields 
+ */
+function schema(collectionName,fields,indexes){
     var properties=getProperties(fields);
-    global.__mongoose_models__[name]={
+    global.__mongoose_models__[collectionName]={
         coll:collectionName,
         schema:createSchema(fields)
     }
     var requiredFields=getRequireFields(fields);
-    global.__mongoose_coll_models__[collectionName]=name;
+    global.__mongoose_coll_models__[collectionName]=collectionName;
     var objproperties={};
     for(var i=0;i<properties.length;i++){
         objproperties[properties[i].field]={
@@ -192,6 +204,9 @@ function schema(name,collectionName,fields){
         },
         validationLevel: "moderate"
     };
+    if(indexes){
+        global.__mongodb_indexes__[collectionName]=indexes;
+    }
 }
 function create(cnn,name){
     if(!global.__mongoose_models__[name].__model){

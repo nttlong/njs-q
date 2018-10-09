@@ -1,8 +1,12 @@
 var expr=require("./expr");
 var sync=require("./sync");
-function aggr(db,name){
+var DB=require("mongodb").Db
+global.__mongodb__views__={}
+global.__mongodb__views_has_created__={}
+function aggr(db,name,schema){
     this.db=db;
     this.name=name;
+    this.schema=schema;
     this.__pipe=[];
 }
 /**
@@ -35,6 +39,12 @@ aggr.prototype.project=function(){
     return this;
 
 };
+/**
+ * @returns {DB}
+ */
+aggr.prototype.getDb=function(){
+    return this.db;
+}
 aggr.prototype.match=function(){
     var _expr=arguments[0];
     var params=[];
@@ -100,6 +110,7 @@ aggr.prototype.lookup=function(form,localField,foreignField,alias){
 
 };
 aggr.prototype.items=function(cb){
+    require("./appy-views")(this.getDb(),this.schema);
     var me=this;
     function exec(cb){
         me.db.collection(me.name).aggregate(me.__pipe,{allowDiskUse:true}).toArray(function(e,r){
@@ -113,7 +124,9 @@ aggr.prototype.items=function(cb){
     }
 };
 aggr.prototype.item=function(cb){
+    require("./appy-views")(this.getDb(),this.schema);
     var me = this;
+    this.applyAllViews();
     function exec(cb) {
         me.db.collection(me.name).aggregate(me.__pipe).toArray(function (e, r) {
             me.__pipe = [];
@@ -134,6 +147,7 @@ aggr.prototype.item=function(cb){
     }
 };
 aggr.prototype.count=function(cb){
+    require("./appy-views")(this.getDb(),this.schema);
     var tmp=[];
     for(var i=0;i<this.__pipe.length;i++){
         tmp.push(this.__pipe[i]);
@@ -166,6 +180,7 @@ aggr.prototype.count=function(cb){
 
 }
 aggr.prototype.page=function(pageIndex,pageSize,cb){
+    require("./appy-views")(this.getDb(),this.schema);
     var ret={
         totalItems:0,
         pageIndex:pageIndex,
@@ -262,6 +277,15 @@ aggr.prototype.group=function(){
     });
     return this;
 };
+aggr.prototype.createView=function(name){
+    global.__mongodb__views__[name]={
+        name:name,
+        source:this.name,
+        pipe:this.__pipe
+    }
+    return this;
+}
+
 module.exports = function (db, name) {
     return new aggr(db, name);
 };

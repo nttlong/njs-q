@@ -143,6 +143,9 @@ function caller(){
     };
     return new CallerResult(fn,args,promiseCaller,callback)
 }
+/**
+ * @returns {Executor}
+ */
 function parallel(){
     return new Executor(arguments);
 }
