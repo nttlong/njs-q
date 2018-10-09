@@ -31,7 +31,7 @@ var data=[{
 )
   */
  try {
-    // var ret=books.insert(data).commit();
+     var ret=books.insert(data).commit();
     
     var agg=books.aggregate();
     agg.project({
@@ -45,7 +45,7 @@ var data=[{
         lastName: "author.last",
         copiesSold: "copies"})
     var items=agg.items();
-    console.log(items);
+    console.log(JSON.stringify(items));
  } catch (error) {
     console.log(error);
  }
