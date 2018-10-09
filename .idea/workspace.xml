@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0ad532da-7565-4521-907d-72b9a53bb958" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/q-coll.rst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/q-coll.rst" beforeDir="false" afterPath="$PROJECT_DIR$/q-coll.rst" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -24,14 +23,14 @@
         <counts>
           <entry key="Python Console" value="14" />
           <entry key="md" value="2781" />
-          <entry key="rst" value="478" />
+          <entry key="rst" value="841" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="Markdown" value="2781" />
           <entry key="Python" value="14" />
-          <entry key="ReST" value="478" />
+          <entry key="ReST" value="841" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
