@@ -50,6 +50,12 @@ function get_expr(fx, params) {
     if (fx.fn && fx.fn === "unaryMinus") {
         return -1 * fx.args[0];
     }
+    if (fx.value && (fx.value===0)) {
+        return fx.value;
+    }
+    if(fx===0){
+        return fx;
+    }
     if (fx === undefined) {
         return null;
     }
@@ -90,7 +96,13 @@ function get_expr(fx, params) {
         else {
             var _params = [];
             fx.args.forEach(element => {
-                _params.push(get_expr(element, params))
+                if(element===0){
+                    _params.push(0);    
+                }
+                else {
+                    _params.push(get_expr(element, params));
+                }
+                
             });
             return {
                 fn: "$" + fx.fn,
@@ -208,7 +220,7 @@ function compileSwicth(fx) {
     var ret = {
         $switch: {
             branches: [],
-            default: convertToMongodbSelector(fx.params[fx.params.length - 1])
+            default: convertToMongodbSelector(fx.params[fx.params.length - 1]||0)
         }
     }
     for (var i = 0; i < fx.params.length - 1; i++) {

@@ -22,7 +22,7 @@ function parseToObject(obj,params){
             ret[key]=parseToObject(val,params);
         }
         else if (typeof val==="string") {
-            var _expr=expr.filter(val,params);
+            var _expr=expr.selector(val,params);
             ret[key] = _expr;
         }
         
@@ -53,7 +53,7 @@ aggr.prototype.project=function(){
             _project[_key]=parseToObject(_val,params);
         }
         else if (typeof _val==="string") {
-            var _expr=expr.filter(_val,params);
+            var _expr=expr.selector(_val,params);
             _project[_key] = _expr;
         }
     }
