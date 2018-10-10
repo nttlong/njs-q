@@ -298,7 +298,8 @@ Example:
    For aggregate we will show each example equivalent to each example at https://docs.mongodb.com/manual/reference/method/db.collection.aggregate/
 
    6.1: project:
-        See https://docs.mongodb.com/manual/reference/operator/aggregation/project/
+        For this link https://docs.mongodb.com/manual/reference/operator/aggregation/project/
+        . It could be rewritten by below:
 
         .. code-block::
 
@@ -439,6 +440,8 @@ Example:
 
     6.2: redact:
 
+        For this link https://docs.mongodb.com/manual/reference/operator/aggregation/redact/
+        . It could be rewritten by below:
         .. code-block::
 
             var data=[{
@@ -497,3 +500,202 @@ Example:
          } catch (error) {
             console.log(error);
          }
+
+        .. code-block::
+
+             var data=[{
+            _id: 1,
+            level: 1,
+            acct_id: "xyz123",
+            cc: {
+              level: 5,
+              type: "yy",
+              num: 000000000000,
+              exp_date: new Date("2015-11-01T00:00:00.000Z"),
+              billing_addr: {
+                level: 5,
+                addr1: "123 ABC Street",
+                city: "Some City"
+              },
+              shipping_addr: [
+                {
+                  level: 3,
+                  addr1: "987 XYZ Ave",
+                  city: "Some City"
+                },
+                {
+                  level: 3,
+                  addr1: "PO Box 0123",
+                  city: "Some City"
+                }
+              ]
+            },
+            status: "A"
+          }]
+         var forecasts=coll.coll("main","forecasts1");
+         /*
+            db.accounts.aggregate(
+            [
+                { $match: { status: "A" } },
+                {
+                $redact: {
+                    $cond: {
+                    if: { $eq: [ "$level", 5 ] },
+                    then: "$$PRUNE",
+                    else: "$$DESCEND"
+                    }
+                }
+                }
+            ]
+            );
+          */
+         try {
+
+            var ret=forecasts.insert(data).commit();
+            var agg=forecasts.aggregate();
+            agg.match("status=={0}","A")
+            agg.redact("if(level==5,{1},{0})","$$DESCEND","$$PRUNE");
+            console.log(JSON.stringify(agg.__pipe));
+            var items=agg.items();
+            console.log(JSON.stringify(items));
+         } catch (error) {
+            console.log(error);
+         }
+
+     6.3 replaceRoot:
+
+        https://docs.mongodb.com/manual/reference/operator/aggregation/replaceRoot/
+
+        .. code-block::
+
+            var data=[{
+                "_id" : 1,
+                "fruit" : [ "apples", "oranges" ],
+                "in_stock" : { "oranges" : 20, "apples" : 60 },
+                "on_order" : { "oranges" : 35, "apples" : 75 }
+             },
+             {
+                "_id" : 2,
+                "vegetables" : [ "beets", "yams" ],
+                "in_stock" : { "beets" : 130, "yams" : 200 },
+                "on_order" : { "beets" : 90, "yams" : 145 }
+             }]
+             var produce=coll.coll("main","produce");
+             /*
+                db.produce.aggregate( [
+                {
+                    $replaceRoot: { newRoot: "$in_stock" }
+                }
+                ] )
+              */
+             try {
+
+                var ret=produce.insert(data).commit();
+                var agg=produce.aggregate();
+                agg.replaceRoot("in_stock")
+                console.log(JSON.stringify(agg.__pipe));
+                var items=agg.items();
+                console.log(JSON.stringify(items));
+             } catch (error) {
+                console.log(error);
+             }
+
+        .. code-block::
+
+             var data=[{ "_id" : 1, "name" : "Arlene", "age" : 34, "pets" : { "dogs" : 2, "cats" : 1 } },
+                        { "_id" : 2, "name" : "Sam", "age" : 41, "pets" : { "cats" : 1, "hamsters" : 3 } },
+                        { "_id" : 3, "name" : "Maria", "age" : 25 }];
+             var people=coll.coll("main","people");
+             /*
+                        db.people.aggregate( [
+                            {
+                                $match: { pets : { $exists: true } }
+                            },
+                            {
+                                $replaceRoot: { newRoot: "$pets" }
+                            }
+                        ] )
+              */
+             try {
+
+                var ret=people.insert(data).commit();
+                var agg=people.aggregate();
+                agg.match("exists(pets)")
+                agg.replaceRoot("pets")
+                console.log(JSON.stringify(agg.__pipe));
+                var items=agg.items();
+                console.log(JSON.stringify(items));
+             } catch (error) {
+                console.log(error);
+             }
+
+        .. code-block::
+
+                var data=[  { "_id" : 1, "first_name" : "Gary", "last_name" : "Sheffield", "city" : "New York" },
+                            { "_id" : 2, "first_name" : "Nancy", "last_name" : "Walker", "city" : "Anaheim" },
+                            { "_id" : 3, "first_name" : "Peter", "last_name" : "Sumner", "city" : "Toledo" }];
+                 var contacts=coll.coll("main","contacts");
+                 /*
+                           db.contacts.aggregate( [
+                            {
+                                $replaceRoot: {
+                                    newRoot: {
+                                        full_name: {
+                                        $concat : [ "$first_name", " ", "$last_name" ]
+                                        }
+                                    }
+                                }
+                            }
+                            ] )
+                  */
+                 try {
+
+                     var ret=contacts.insert(data).commit();
+                    var agg=contacts.aggregate();
+
+                    agg.replaceRoot({
+                        full_name:"concat(first_name,{0},last_name)"
+                    }," ");
+                    console.log(JSON.stringify(agg.__pipe));
+                    var items=agg.items();
+                    console.log(JSON.stringify(items));
+                 } catch (error) {
+                    console.log(error);
+                 }
+
+
+        .. code-block::
+
+            var data=[ { "_id" : 1, "name" : "Susan",
+                "phones" : [ { "cell" : "555-653-6527" },
+             { "home" : "555-965-2454" } ] },
+                { "_id" : 2, "name" : "Mark",
+                    "phones" : [ { "cell" : "555-445-8767" },
+                            { "home" : "555-322-2774" } ] }];
+                 var contacts=coll.coll("main","contacts1");
+                 /*
+                           db.contacts.aggregate( [
+                    {
+                        $unwind: "$phones"
+                    },
+                    {
+                        $match: { "phones.cell" : { $exists: true } }
+                    },
+                    {
+                        $replaceRoot: { newRoot: "$phones"}
+                    }
+                    ] )
+                  */
+                 try {
+
+                    var ret=contacts.insert(data).commit();
+                    var agg=contacts.aggregate();
+
+                    agg.unwind("phones").match("exists(phones.cell)")
+                    agg.replaceRoot("phones")
+                    console.log(JSON.stringify(agg.__pipe));
+                    var items=agg.items();
+                    console.log(JSON.stringify(items));
+                 } catch (error) {
+                    console.log(error);
+                 }

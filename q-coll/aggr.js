@@ -113,14 +113,16 @@ aggr.prototype.match=function(){
     });
     return this;
 };
-aggr.prototype.unwind = function (field, preserveNullAndEmptyArrays){
+aggr.prototype.unwind = function (field, preserveNullAndEmptyArrays,includeArrayIndex){
     if (preserveNullAndEmptyArrays==undefined){
         preserveNullAndEmptyArrays=false;
     }
+    
     this.__pipe.push({
         $unwind:{
             path: "$" + field,
-            preserveNullAndEmptyArrays: preserveNullAndEmptyArrays
+            preserveNullAndEmptyArrays: preserveNullAndEmptyArrays,
+            includeArrayIndex:includeArrayIndex
         }
     });
     return this;
@@ -131,21 +133,64 @@ aggr.prototype.sort=function(fields){
     });
     return this;
 };
+aggr.prototype.sortByCount=function(fieldName){
+    this.__pipe.push({
+        $sortByCount:"$"+fieldName
+    });
+    return this;
+}
 aggr.prototype.limit=function(num){
     this.__pipe.push(
         {$limit:num}
     );
     return this;
 };
-aggr.prototype.replaceRoot=function(newRoot){
-    this.__pipe.push(
-        {
-            $replaceRoot:{
-                newRoot:"$"+newRoot
+aggr.prototype.replaceRoot=function(){
+    var newRoot=undefined;
+    var params=[];
+    newRoot = arguments[0];
+    for(var i=1;i<arguments.length;i++){
+        params.push(arguments[i]);
+    }
+
+    if( typeof newRoot ==="string"){
+        this.__pipe.push(
+            {
+                $replaceRoot:{
+                    newRoot:"$"+newRoot
+                }
             }
+        );
+        return this;
+    }
+    if(newRoot instanceof Object){
+        var keys=Object.keys(newRoot);
+        if(keys.length===1 && typeof newRoot[keys[0]]==="string"){
+                var x= expr.selector(newRoot[keys[0]],params);
+                var n={}
+                n[keys[0]]=x;    
+                this.__pipe.push({
+                    $replaceRoot:{
+                        newRoot:n
+                    }
+                });
+                return this;
         }
-    );
-    return this;
+        if(newRoot instanceof Object){
+            var n={};
+            n[keys[0]]=parseToObject(newRoot,params);
+            this.__pipe.push({
+                $replaceRoot:{
+                    newRoot:n
+                }
+                
+            });
+            return this;
+        }
+      
+
+    }
+    
 };
 aggr.prototype.skip=function(num){
     this.__pipe.push(

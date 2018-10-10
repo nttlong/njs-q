@@ -47,6 +47,13 @@ function parseToMongo(fx,params,prefix){
                 "$expr": parseToMongo(fx.args[0], params)
             };
         }
+        else if(fx.name=="exists"){
+            ret={};
+            ret[parseToMongo(fx.args[0], params)]={};
+            ret[parseToMongo(fx.args[0], params)]["$exists"]=true;
+            return ret;
+
+        }
         else if (avg_functions.indexOf(";"+fx.name+";")>-1){
             ret["$" + fx.name]=parseToMongo(fx.args[0], params,"$");
             return ret;

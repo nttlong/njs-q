@@ -2,58 +2,33 @@ var coll=require("./q-coll");
 var db=require("mongodb").MongoClient
 
 coll.db("main","mongodb://root:123456@localhost:27017/hrm");
-var data=[{
-    _id: 1,
-    level: 1,
-    acct_id: "xyz123",
-    cc: {
-      level: 5,
-      type: "yy",
-      num: 000000000000,
-      exp_date: new Date("2015-11-01T00:00:00.000Z"),
-      billing_addr: {
-        level: 5,
-        addr1: "123 ABC Street",
-        city: "Some City"
-      },
-      shipping_addr: [
-        {
-          level: 3,
-          addr1: "987 XYZ Ave",
-          city: "Some City"
-        },
-        {
-          level: 3,
-          addr1: "PO Box 0123",
-          city: "Some City"
-        }
-      ]
-    },
-    status: "A"
-  }]
- var forecasts=coll.coll("main","forecasts1");
+var data=[ { "_id" : 1, "name" : "Susan",
+                "phones" : [ { "cell" : "555-653-6527" },
+             { "home" : "555-965-2454" } ] },
+            { "_id" : 2, "name" : "Mark",
+                "phones" : [ { "cell" : "555-445-8767" },
+                        { "home" : "555-322-2774" } ] }];
+ var contacts=coll.coll("main","contacts1");
  /*
-    db.accounts.aggregate(
-    [
-        { $match: { status: "A" } },
-        {
-        $redact: {
-            $cond: {
-            if: { $eq: [ "$level", 5 ] },
-            then: "$$PRUNE",
-            else: "$$DESCEND"
-            }
-        }
-        }
-    ]
-    );
+           db.contacts.aggregate( [
+    {
+        $unwind: "$phones"
+    },
+    {
+        $match: { "phones.cell" : { $exists: true } }
+    },
+    {
+        $replaceRoot: { newRoot: "$phones"}
+    }
+    ] )
   */
  try {
     
-    // var ret=forecasts.insert(data).commit();
-    var agg=forecasts.aggregate();
-    agg.match("status=={0}","A")
-    agg.redact("if(level==5,{1},{0})","$$DESCEND","$$PRUNE");
+    var ret=contacts.insert(data).commit();
+    var agg=contacts.aggregate();
+    
+    agg.unwind("phones").match("exists(phones.cell)")
+    agg.replaceRoot("phones")
     console.log(JSON.stringify(agg.__pipe));
     var items=agg.items();
     console.log(JSON.stringify(items));
