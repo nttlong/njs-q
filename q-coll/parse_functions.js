@@ -63,6 +63,25 @@ function parse_elemMatch(fx,params,prefix,parseToMongo){
 
     }
 }
+function parse_if(fx,params,prefix,parseToMongo){
+    /*
+        $cond: {
+           if: { $gt: [ { $size: { $setIntersection: [ "$tags", userAccess ] } }, 0 ] },
+           then: "$$DESCEND",
+           else: "$$PRUNE"
+         }
+    */
+    var _if=parseToMongo(fx.args[0], params, prefix);
+    var _then = parseToMongo(fx.args[1], params, prefix);
+    var _else = parseToMongo(fx.args[2], params, prefix);
+    return {
+        $cond:{
+            if:_if,
+            then:_then,
+            else:_else
+        }
+    }
+}
 function parse_fn(fx, params, prefix, parseToMongo){
     if(fx.name=="contains"){
         return parse_contains(fx, params, prefix,parseToMongo);
@@ -72,6 +91,9 @@ function parse_fn(fx, params, prefix, parseToMongo){
     }
     if (fx.name =="elemMatch"){
         return parse_elemMatch(fx, params, prefix, parseToMongo);
+    }
+    if (fx.name =="if"){
+        return parse_if(fx, params, prefix, parseToMongo);
     }
 }
 

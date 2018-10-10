@@ -9,30 +9,31 @@ function aggr(db,name,schema){
     this.schema=schema;
     this.__pipe=[];
 }
+function parseToObject(obj,params){
+    var ret={};
+    var keys=Object.keys(obj);
+    for (var i = 0; i < keys.length;i++){
+        var key=keys[i];
+        var val = obj[key];
+        if(val===1 || val==0){
+            ret[key]=val;
+        }
+        else if (val instanceof Object){
+            ret[key]=parseToObject(val,params);
+        }
+        else if (typeof val==="string") {
+            var _expr=expr.filter(val,params);
+            ret[key] = _expr;
+        }
+        
+    }
+    return ret;
+}
 /**
  * Project
  */
 aggr.prototype.project=function(){
-    function parseToObject(obj,params){
-        var ret={};
-        var keys=Object.keys(obj);
-        for (var i = 0; i < keys.length;i++){
-            var key=keys[i];
-            var val = obj[key];
-            if(val===1 || val==0){
-                ret[key]=val;
-            }
-            else if (val instanceof Object){
-                ret[key]=parseToObject(val,params);
-            }
-            else if (typeof val==="string") {
-                var _expr=expr.filter(val,params);
-                ret[key] = _expr;
-            }
-            
-        }
-        return ret;
-    }
+    
     var fields;
     var  params=[];
     fields=arguments[0];
@@ -62,6 +63,39 @@ aggr.prototype.project=function(){
     return this;
 
 };
+aggr.prototype.redact=function(){
+    var _inputExpr=arguments[0];
+
+    // var fields;
+    var  params=[];
+    fields=arguments[0];
+    for(var i=1;i<arguments.length;i++){
+        params.push(arguments[i]);
+    }
+
+    // var _redact={};
+    // var _keys = Object.keys(fields);
+    // for (var i = 0; i < _keys.length;i++){
+    //     _key = _keys[i];
+    //     var _val = fields[_key];
+    //     if(_val===1 || _val==0){
+    //         _redact[_key]=_val;
+    //     }
+    //     else if (_val instanceof Object){
+    //         _redact[_key]=parseToObject(_val,params);
+    //     }
+    //     else if (typeof _val==="string") {
+    //         var _expr=expr.filter(_val,params);
+    //         _redact[_key] = _expr;
+    //     }
+    // }
+    
+    var _expr=expr.filter(_inputExpr,params);
+    this.__pipe.push(
+       { $redact: _expr}
+    );
+    return this;
+}
 /**
  * @returns {DB}
  */
