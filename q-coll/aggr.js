@@ -72,24 +72,6 @@ aggr.prototype.redact=function(){
     for(var i=1;i<arguments.length;i++){
         params.push(arguments[i]);
     }
-
-    // var _redact={};
-    // var _keys = Object.keys(fields);
-    // for (var i = 0; i < _keys.length;i++){
-    //     _key = _keys[i];
-    //     var _val = fields[_key];
-    //     if(_val===1 || _val==0){
-    //         _redact[_key]=_val;
-    //     }
-    //     else if (_val instanceof Object){
-    //         _redact[_key]=parseToObject(_val,params);
-    //     }
-    //     else if (typeof _val==="string") {
-    //         var _expr=expr.filter(_val,params);
-    //         _redact[_key] = _expr;
-    //     }
-    // }
-    
     var _expr=expr.selector(_inputExpr,params);
     this.__pipe.push(
        { $redact: _expr}
