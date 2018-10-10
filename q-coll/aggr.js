@@ -90,7 +90,7 @@ aggr.prototype.redact=function(){
     //     }
     // }
     
-    var _expr=expr.filter(_inputExpr,params);
+    var _expr=expr.selector(_inputExpr,params);
     this.__pipe.push(
        { $redact: _expr}
     );

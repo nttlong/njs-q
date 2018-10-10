@@ -220,6 +220,18 @@ function compileSwicth(fx) {
     }
     return ret;
 }
+function compileIf(fx){
+    return {
+        $cond: {
+                if: convertToMongodbSelector(fx.params[0]),
+                then: convertToMongodbSelector(fx.params[1]),
+                else: convertToMongodbSelector(fx.params[2])
+
+        }
+    }
+  
+    return ret;
+}
 function convertToMongodbSelector(fx, params) {
     if (fx.fn && fx.fn === "$case") {
         return compileCase(fx);
@@ -229,6 +241,9 @@ function convertToMongodbSelector(fx, params) {
     }
     if (fx.fn && fx.fn === "$switch") {
         return compileSwicth(fx);
+    }
+    if (fx.fn && fx.fn === "$if") {
+        return compileIf(fx,params);
     }
     if (typeof fx == "string") {
         return fx

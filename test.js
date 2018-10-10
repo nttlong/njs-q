@@ -4,54 +4,56 @@ var db=require("mongodb").MongoClient
 coll.db("main","mongodb://root:123456@localhost:27017/hrm");
 var data=[{
     _id: 1,
-    title: "123 Department Report",
-    tags: [ "G", "STLW" ],
-    year: 2014,
-    subsections: [
-      {
-        subtitle: "Section 1: Overview",
-        tags: [ "SI", "G" ],
-        content:  "Section 1: This is the content of section 1."
+    level: 1,
+    acct_id: "xyz123",
+    cc: {
+      level: 5,
+      type: "yy",
+      num: 000000000000,
+      exp_date: new Date("2015-11-01T00:00:00.000Z"),
+      billing_addr: {
+        level: 5,
+        addr1: "123 ABC Street",
+        city: "Some City"
       },
-      {
-        subtitle: "Section 2: Analysis",
-        tags: [ "STLW" ],
-        content: "Section 2: This is the content of section 2."
-      },
-      {
-        subtitle: "Section 3: Budgeting",
-        tags: [ "TK" ],
-        content: {
-          text: "Section 3: This is the content of section3.",
-          tags: [ "HCS" ]
+      shipping_addr: [
+        {
+          level: 3,
+          addr1: "987 XYZ Ave",
+          city: "Some City"
+        },
+        {
+          level: 3,
+          addr1: "PO Box 0123",
+          city: "Some City"
         }
-      }
-    ]
+      ]
+    },
+    status: "A"
   }]
- var forecasts=coll.coll("main","forecasts");
+ var forecasts=coll.coll("main","forecasts1");
  /*
-   db.forecasts.aggregate(
-   [
-     { $match: { year: 2014 } },
-     { $redact: {
-        $cond: {
-           if: { $gt: [ { $size: { $setIntersection: [ "$tags", userAccess ] } }, 0 ] },
-           then: "$$DESCEND",
-           else: "$$PRUNE"
-         }
-       }
-     }
-   ]
-);
-)
+    db.accounts.aggregate(
+    [
+        { $match: { status: "A" } },
+        {
+        $redact: {
+            $cond: {
+            if: { $eq: [ "$level", 5 ] },
+            then: "$$PRUNE",
+            else: "$$DESCEND"
+            }
+        }
+        }
+    ]
+    );
   */
  try {
-    var userAccess = [ "STLW", "G" ];
-    //  var ret=forecasts.insert(data).commit();
     
+    // var ret=forecasts.insert(data).commit();
     var agg=forecasts.aggregate();
-    agg.match("year==2014")
-    agg.redact("if(size(setIntersection(tags,{0}))>0,{1},{2})",userAccess,"$$DESCEND","$$PRUNE");
+    agg.match("status=={0}","A")
+    agg.redact("if(level==5,{1},{0})","$$DESCEND","$$PRUNE");
     console.log(JSON.stringify(agg.__pipe));
     var items=agg.items();
     console.log(JSON.stringify(items));

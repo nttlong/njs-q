@@ -75,7 +75,7 @@ function parseToMongo(fx,params,prefix){
         if(typeof left=="string" && fx.op==="=="){
             var right = parseToMongo(fx.args[1], params);
             ret[left][operators[fx.op]] = right;
-            if (typeof right == "string") {
+            if (typeof right == "string" && fx.op==="==") {
                 ret = {};
                 ret[left] = { $regex: new RegExp("^" + right + "$", "i") };
                 return ret;
