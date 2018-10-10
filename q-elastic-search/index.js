@@ -67,6 +67,12 @@ var es_index=require("../q-elastic-search/es-index")
   function searchSync(query){
     return sync.sync(search,[query]);
   }
+  /**
+   * 
+   * @param {*} name 
+   * @param {*} type 
+   * @returns {es_index}
+   */
   function index(name,type){
     
     checkSetting();
@@ -78,5 +84,6 @@ var es_index=require("../q-elastic-search/es-index")
     pingSync:pingSync,
     search:search,
     searchSync:searchSync,
-    index:index
+    index:index,
+    es_index: es_index
   }
