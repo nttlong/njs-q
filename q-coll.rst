@@ -297,7 +297,7 @@ Example:
 6- aggregate:
    For aggregate we will show each example equivalent to each example at https://docs.mongodb.com/manual/reference/method/db.collection.aggregate/
 
-   6.1: project:
+    6.1: project:
         For this link https://docs.mongodb.com/manual/reference/operator/aggregation/project/
         . It could be rewritten by below:
 
@@ -439,7 +439,6 @@ Example:
 
 
     6.2: redact:
-
         For this link https://docs.mongodb.com/manual/reference/operator/aggregation/redact/
         . It could be rewritten by below:
         .. code-block::
@@ -562,8 +561,7 @@ Example:
             console.log(error);
          }
 
-     6.3 replaceRoot:
-
+    6.3 replaceRoot:
         https://docs.mongodb.com/manual/reference/operator/aggregation/replaceRoot/
 
         .. code-block::
