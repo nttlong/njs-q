@@ -93,7 +93,13 @@ function parse_in(fx,params,prefix,parseToMongo){
 function parse_exist(fx, params, prefix, parseToMongo){
     //{ price: { $exists: 1 } }
     var ret={};
-    ret[parseToMongo(fx.args[0], params, prefix)]={$exists:1}
+    if(fx.args.length==1){
+        ret[parseToMongo(fx.args[0], params, prefix)]={$exists:1}
+    }
+    else {
+        ret[parseToMongo(fx.args[0], params, prefix)]={$exists:parseToMongo(fx.args[1], params, prefix)}
+    }
+    
     return ret;
 }
 function parse_fn(fx, params, prefix, parseToMongo){
