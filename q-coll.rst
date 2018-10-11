@@ -897,9 +897,5 @@ Example:
                     console.log(error);
                  }
 
-import link
 
-
-.. _link to my code: https://github.com/ericholscher/reStructuredText-Philosophy
-
-
+.. include:: q-coll-Aggregation-Pipeline-Stages.rst
