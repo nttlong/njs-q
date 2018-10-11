@@ -255,3 +255,9 @@ Aggregation Pipeline Stages
         console.log(JSON.stringify(qr.__pipe));
         var items=qr.items();
         console.log(JSON.stringify(items));
+
+
+.. _a link: https://domain.invalid/
+
+
+
