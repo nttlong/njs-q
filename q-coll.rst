@@ -896,3 +896,10 @@ Example:
                  } catch (error) {
                     console.log(error);
                  }
+
+import link
+
+
+.. _link to my code: https://github.com/ericholscher/reStructuredText-Philosophy
+
+
