@@ -82,6 +82,14 @@ function parse_if(fx,params,prefix,parseToMongo){
         }
     }
 }
+function parse_in(fx,params,prefix,parseToMongo){
+    /*
+         $in: ["appliances", "school"]
+    */
+   var ret={};
+   ret[parseToMongo(fx.args[0], params, prefix)]=parseToMongo(fx.args[1], params, prefix)
+   return ret;
+}
 function parse_fn(fx, params, prefix, parseToMongo){
     if(fx.name=="contains"){
         return parse_contains(fx, params, prefix,parseToMongo);
@@ -94,6 +102,9 @@ function parse_fn(fx, params, prefix, parseToMongo){
     }
     if (fx.name =="if"){
         return parse_if(fx, params, prefix, parseToMongo);
+    }
+    if (fx.name =="in"){
+        return parse_in(fx, params, prefix, parseToMongo);
     }
 }
 

@@ -12,24 +12,27 @@ var data=[
  var sales=coll.coll("main","sales");
  /*
     db.sales.aggregate(
-    [
-        {
-            $group : {
-            _id : null,
-            totalPrice: { $sum: { $multiply: [ "$price", "$quantity" ] } },
-            averageQuantity: { $avg: "$quantity" },
-            count: { $sum: 1 }
-            }
+   [
+      {
+        $group : {
+           _id : { month: { $month: "$date" }, day: { $dayOfMonth: "$date" }, year: { $year: "$date" } },
+           totalPrice: { $sum: { $multiply: [ "$price", "$quantity" ] } },
+           averageQuantity: { $avg: "$quantity" },
+           count: { $sum: 1 }
         }
-    ]
-    )
+      }
+   ]
 )
   */
  try {
     
-    // var ret=sales.insert(data).commit();
+    var ret=sales.insert(data).commit();
     var qr=sales.aggregate().group({
-        _id:null,
+        _id:{
+            month:"month(date)",
+            day:"dayOfMonth(data)",
+            year:"year(date)"
+        },
         totalPrice:"sum(price*quantity)",
         averageQuantity:"avg(quantity)",
         count:"sum(1)"

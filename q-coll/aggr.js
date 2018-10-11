@@ -356,6 +356,10 @@ aggr.prototype.group=function(){
             }
         }
     }
+    if(info._id===null || info._id===undefined){
+        group._id=undefined;
+    }
+    
     this.__pipe.push({
         $group:group
     });
