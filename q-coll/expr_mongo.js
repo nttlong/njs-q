@@ -15,8 +15,8 @@ const operators = {
     "or": "$or"
 
 };
-const avg_functions=";sum;min;max;avg;stdDevPop;stdDevSamp;meta;first;last;not;push;";
-var functions =";contains;start;end;objectId;elemMatch;if;switch;case;in;";
+const avg_functions=";sum;min;max;avg;stdDevPop;stdDevSamp;meta;first;last;not;push;count;";
+var functions =";contains;start;end;objectId;elemMatch;if;switch;case;in;count;exist;";
 function parseToMongo(fx,params,prefix){
     var ret ={}
     if(fx.type==="ParenthesisNode"){

@@ -90,6 +90,12 @@ function parse_in(fx,params,prefix,parseToMongo){
    ret[parseToMongo(fx.args[0], params, prefix)]=parseToMongo(fx.args[1], params, prefix)
    return ret;
 }
+function parse_exist(fx, params, prefix, parseToMongo){
+    //{ price: { $exists: 1 } }
+    var ret={};
+    ret[parseToMongo(fx.args[0], params, prefix)]={$exists:1}
+    return ret;
+}
 function parse_fn(fx, params, prefix, parseToMongo){
     if(fx.name=="contains"){
         return parse_contains(fx, params, prefix,parseToMongo);
@@ -105,6 +111,9 @@ function parse_fn(fx, params, prefix, parseToMongo){
     }
     if (fx.name =="in"){
         return parse_in(fx, params, prefix, parseToMongo);
+    }
+    if (fx.name =="exist"){
+        return parse_exist(fx, params, prefix, parseToMongo);
     }
 }
 

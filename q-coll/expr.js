@@ -244,6 +244,13 @@ function compileIf(fx){
   
     return ret;
 }
+function compileCount(fx){
+    return {
+        count: convertToMongodbSelector(fx.params[0])
+    }
+  
+    return ret;
+}
 function convertToMongodbSelector(fx, params) {
     if (fx.fn && fx.fn === "$case") {
         return compileCase(fx);
@@ -256,6 +263,9 @@ function convertToMongodbSelector(fx, params) {
     }
     if (fx.fn && fx.fn === "$if") {
         return compileIf(fx,params);
+    }
+    if (fx.fn && fx.fn === "$count") {
+        return compileCount(fx,params);
     }
     if (typeof fx == "string") {
         return fx
