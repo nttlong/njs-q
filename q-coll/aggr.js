@@ -328,7 +328,7 @@ aggr.prototype.group=function(){
     var _id=info._id||{};
     var group={_id:{}};
     if(typeof _id==="string"){
-        group._id=id;
+        group._id=expr.selector(_id);
     }
     else {
         var keys=Object.keys(_id);

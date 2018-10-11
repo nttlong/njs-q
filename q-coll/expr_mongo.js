@@ -15,7 +15,7 @@ const operators = {
     "or": "$or"
 
 };
-const avg_functions=";sum;min;max;avg;stdDevPop;stdDevSamp;meta;first;last;not";
+const avg_functions=";sum;min;max;avg;stdDevPop;stdDevSamp;meta;first;last;not;push;";
 var functions =";contains;start;end;objectId;elemMatch;if;switch;case;in;";
 function parseToMongo(fx,params,prefix){
     var ret ={}

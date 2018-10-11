@@ -821,3 +821,23 @@ Example:
             console.log(error);
          }
 
+    .. code-block::
+
+        var sales=coll.coll("main","sales");
+         /*
+            db.sales.aggregate( [ { $group : { _id : "$item" } } ] )
+          */
+         try {
+
+            // var ret=sales.insert(data).commit();
+            var qr=sales.aggregate().group({
+                _id:"item"
+            });
+            console.log(JSON.stringify(qr.__pipe));
+            var items=qr.items();
+            console.log(JSON.stringify(items));
+
+         } catch (error) {
+            console.log(error);
+         }
+
