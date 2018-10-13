@@ -82,13 +82,20 @@ function parse_if(fx,params,prefix,parseToMongo){
         }
     }
 }
-function parse_in(fx,params,prefix,parseToMongo){
+function parse_in(fx, params, prefix, parseToMongo) {
     /*
          $in: ["appliances", "school"]
     */
-   var ret={};
-   ret[parseToMongo(fx.args[0], params, prefix)]=parseToMongo(fx.args[1], params, prefix)
-   return ret;
+    var ret = {};
+    var field = parseToMongo(fx.args[0], params, prefix);
+    var right = parseToMongo(fx.args[1], params, prefix)
+
+    ret[field] = {
+        $in: right
+    }
+    return ret;
+
+
 }
 function parse_exist(fx, params, prefix, parseToMongo){
     //{ price: { $exists: 1 } }
