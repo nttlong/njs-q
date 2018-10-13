@@ -1,5 +1,5 @@
 var sync=require("../q-sync");
-function checkIsExit(client,index){
+function checkIsExit(client,index,cb){
     function run(cb){
         client.indices.exists({
              index: index
@@ -8,9 +8,13 @@ function checkIsExit(client,index){
 
             });
     }
-    return sync.sync(run,[]);
+    if(cb) run(cb);
+    else {
+        return sync.sync(run, []);
+    }
+    
 }
-function createIndex(client,index){
+function createIndex(client,index,cb){
     function run(cb) {
         client.indices.create({
             index: index
@@ -19,7 +23,47 @@ function createIndex(client,index){
 
         });
     }
-    return sync.sync(run, []);
+    if(cb) run(cb);
+    else {
+        return sync.sync(run, []);
+    }
+    
+}
+function checkIsExists(client,index,type,id,cb){
+    function run(cb){
+        client.exists({
+            index: index,
+            type: type,
+            id: id
+        },function(e,r){
+            cb(e,r);
+        });
+    }
+    if(cb) run(cb);
+    else {
+        return sync.sync(run, []);    
+    }
+    return sync.sync(run,[]);
+    
+}
+function deleteById(client,index,type,id,cb){
+    function run(cb){
+        client.delete({
+            index: index,
+            type: type,
+            id: id
+        }).then(function(r){
+            cb(undefined,r);
+        }).catch(function(ex){
+            cb(ex);
+        });
+    }
+    if(cb){
+        run(cb);
+    }
+    else {
+        return sync.sync(run,[])
+    }
 }
 function es_indexes(client,index,type){
     var me=this;
@@ -42,7 +86,17 @@ es_indexes.prototype.searchText = function (text, callback) {
             q:text
             
         }, function (e, r, s) {
-            cb(e, r);
+            if(e){
+                cb(e);
+                return;
+            }
+            if(r.hits){
+                cb(e, r.hits);
+            }
+            else {
+                cb(null,null);
+            }
+           
 
         });
     }
@@ -55,47 +109,10 @@ es_indexes.prototype.searchText = function (text, callback) {
     
 };
 es_indexes.prototype.exists = function (id, callback) {
-    var me=this;
-    var client = me.__client;
-    function run(cb){
-        client.exists({
-            index: me.index,
-            type: me.type,
-            id: id
-        }).then(function (res) {
-            cb(null, res);
-        }).catch(function (ex) {
-            cb(ex);
-
-        });
-    }
-    if(callback){
-        run(callback);
-    }
-    else {
-        return sync.sync(run,[]);
-    }
-}
+    return checkIsExists(this.__client,this.index,this.type,id,callback);
+};
 es_indexes.prototype.delete = function (id, callback) {
-    var me=this;
-    var client = me.__client;
-    function run(cb){
-        client.delete({
-            index: me.index,
-            type: me.type,
-            id: id
-        }).then(function (result) {
-            cb(null, result);
-        }).catch(function (ex) {
-            cb(ex);
-        });
-    }
-    if(callback){
-        run(cb);
-    }
-    else {
-        return sync.sync(run,[]);
-    }
+    return deleteById(this.__client, this.index, this.type, id, callback);
 };
 es_indexes.prototype.create = function (id, body, callback) {
     
@@ -104,6 +121,10 @@ es_indexes.prototype.create = function (id, body, callback) {
     var isExist = checkIsExit(me.__client, me.index);
     if(!isExist){
         createIndex(me.__client,me.index);
+    }
+    isExist = checkIsExists(me.__client,me.index,me.type,id);
+    if(isExist){
+        deleteById(me.__client,me.index,me.type,id);
     }
     function run(cb){
         client.create({
@@ -114,6 +135,7 @@ es_indexes.prototype.create = function (id, body, callback) {
         }).then(function (result) {
             cb(null, result);
         }).catch(function (ex) {
+            
             cb(ex);
         });
     }
