@@ -438,7 +438,7 @@ coll.prototype.delete=function(cb){
         _coll=me.getDb().collection(me.schema+"."+ me.name);
     }
     function exec(cb){
-        coll.deleteMany(me.__where,function(e,r){
+        _coll.deleteMany(me.__where,function(e,r){
             cb(e,r);
         });
     }
