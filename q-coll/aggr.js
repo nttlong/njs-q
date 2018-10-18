@@ -398,6 +398,9 @@ aggr.prototype.addFields=function(){
             var _expr=expr.selector(_val,params);
             _addFields[_key] = _expr;
         }
+        else {
+            _addFields[_key] = _val;
+        }
     }
     this.__pipe.push(
        { $addFields: _addFields}

@@ -2,7 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0ad532da-7565-4521-907d-72b9a53bb958" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/helps/q-coll.rst" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/helps/q-coll/addFields.rst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/q-coll-Aggregation-Pipeline-Stages.rst" beforeDir="false" afterPath="$PROJECT_DIR$/q-coll-Aggregation-Pipeline-Stages.rst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/q-coll/aggr.js" beforeDir="false" afterPath="$PROJECT_DIR$/q-coll/aggr.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test.js" beforeDir="false" afterPath="$PROJECT_DIR$/test.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -16,33 +21,36 @@
         <counts>
           <entry key="project.closed" value="1" />
           <entry key="project.open.time.1" value="2" />
+          <entry key="project.open.time.4" value="1" />
           <entry key="project.open.time.5" value="1" />
-          <entry key="project.open.time.6" value="1" />
-          <entry key="project.opened" value="5" />
+          <entry key="project.open.time.6" value="2" />
+          <entry key="project.open.time.8" value="1" />
+          <entry key="project.open.time.9" value="1" />
+          <entry key="project.opened" value="9" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Python Console" value="14" />
           <entry key="md" value="2781" />
-          <entry key="rst" value="3500" />
+          <entry key="rst" value="3675" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="Markdown" value="2781" />
           <entry key="Python" value="14" />
-          <entry key="ReST" value="3500" />
+          <entry key="ReST" value="3675" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="rst" value="3" />
+          <entry key="rst" value="5" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="ReST" value="3" />
+          <entry key="ReST" value="5" />
         </counts>
       </usages-collector>
     </session>
@@ -66,7 +74,17 @@
           <provider selected="true" editor-type-id="restructured-text-editor" />
         </entry>
       </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/helps/q-coll.rst">
+          <provider selected="true" editor-type-id="restructured-text-editor" />
+        </entry>
+      </file>
       <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/helps/q-coll/addFields.rst">
+          <provider selected="true" editor-type-id="restructured-text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/q-coll-Aggregation-Pipeline-Stages.rst">
           <provider selected="true" editor-type-id="restructured-text-editor" />
         </entry>
@@ -82,6 +100,8 @@
         <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/q-coll.rst" />
         <option value="$PROJECT_DIR$/q-coll-Aggregation-Pipeline-Stages.rst" />
+        <option value="$PROJECT_DIR$/helps/q-coll.rst" />
+        <option value="$PROJECT_DIR$/helps/q-coll/addFields.rst" />
       </list>
     </option>
   </component>
@@ -96,7 +116,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -104,10 +123,16 @@
               <item name="quicky" type="b2602c69:ProjectViewProjectNode" />
               <item name="quicky" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="quicky" type="b2602c69:ProjectViewProjectNode" />
+              <item name="quicky" type="462c0819:PsiDirectoryNode" />
+              <item name="helps" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -150,7 +175,7 @@
     <frame x="67" y="25" width="1853" height="1055" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.21029331" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.21914776" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -185,10 +210,16 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/q-coll-Aggregation-Pipeline-Stages.rst">
+      <provider selected="true" editor-type-id="restructured-text-editor" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/q-coll.rst">
       <provider selected="true" editor-type-id="restructured-text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/q-coll-Aggregation-Pipeline-Stages.rst">
+    <entry file="file://$PROJECT_DIR$/helps/q-coll.rst">
+      <provider selected="true" editor-type-id="restructured-text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/helps/q-coll/addFields.rst">
       <provider selected="true" editor-type-id="restructured-text-editor" />
     </entry>
   </component>
