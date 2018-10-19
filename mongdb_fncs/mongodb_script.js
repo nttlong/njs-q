@@ -1,3 +1,4 @@
+use test001
 db.system.js.save(
 	{
 	  _id: "jsep",
@@ -693,136 +694,155 @@ db.system.js.save(
 db.system.js.save({
     _id:"js_parse",
     value:function(fx,params,forSelect){
-        var ret={};
-        var op={
-            "==":"$eq",
-            "!=":"$ne",
-            ">":"$gt",
-            "<":"$lt",
-            ">=":"$gte",
-            "<=":"$lte",
-            "+":"$add",
-            "-":"$subtract",
-            "*":"$multiply",
-            "/":"$divide",
-            "%":"$mod"
-        }
-        var logical={
-            "&&":"$and",
-            "||":"$or"
-        }
-       
-        if(fx.type==='Identifier'){
-            return fx.name;
-        }
-        if(fx.type==='MemberExpression'){
-            var left=js_parse(fx.object,params,false)
-            return left+"."+fx.property.name
-        }
-        if(fx.type=='Literal'){
-            return fx.value;
-        }
-        if(fx.type==='BinaryExpression'){
-            ret={}
-            var right = js_parse(fx.right,params,false)
-            var left = js_parse(fx.left,params,false)
-            if(fx.operator=='=='){
-            
-                if(typeof right=="string"){
-                    
-                    ret[left]={
-                        $regex:new RegExp("^"+right+"$","i")
-                        
-                    };
-                    return ret
-                }
-            }
-            if(typeof left==="string"){
-                ret[left]={}
-                ret[left][op[fx.operator]]=right
-                return ret    
-            }
-            else {
-                ret[op[fx.operator]]=[left,right];
-                return ret;
-            }
-            
-            
-        }
-        if(fx.type==='LogicalExpression'){
-            var ret={}
-            ret[logical[fx.operator]]=[js_parse(fx.left,params,true),js_parse(fx.right,params,true)]
-            return ret
-        }
-        if(fx.type==='BinaryExpression'){
-            
-        }
-        if(fx.type==='CallExpression'){
-            if(fx.callee.name=="getParams"){
+         if(!forSelect) {
+        forSelect=false;
+    }
+    var avgFuncs=";$avg;$sum;$min;$max;$push;"
+    var ret={};
+    var op={
+        "==":"$eq",
+        "!=":"$ne",
+        ">":"$gt",
+        "<":"$lt",
+        ">=":"$gte",
+        "<=":"$lte",
+        "+":"$add",
+        "-":"$subtract",
+        "*":"$multiply",
+        "/":"$divide",
+        "%":"$mod"
+    }
+    var mathOp=";$add;$subtract;$multiply;$divide;$mod;";
+    var matchOp=";$eq;$ne;$gt;$lt;$gte;$lte;";
+    var logical={
+        "&&":"$and",
+        "||":"$or"
+    }
+   
+    if(fx.type==='Identifier'){
+        return fx.name;
+    }
+    if(fx.type==='MemberExpression'){
+        var left=js_parse(fx.object,params,forSelect)
+        return left+"."+fx.property.name
+    }
+    if(fx.type=='Literal'){
+        return fx.value;
+    }
+    if(fx.type==='BinaryExpression'){
+        ret={}
+        var right = js_parse(fx.right,params,forSelect)
+        var left = js_parse(fx.left,params,forSelect)
+        if(fx.operator=='=='){
+        
+            if(typeof right=="string"){
                 
-                return params[fx.arguments[0].value];
-            }
-            if(fx.callee.name==='expr'){
-                ret={
-                    $expr:js_parse(fx.arguments[0],params,true)
+                ret[left]={
+                    $regex:new RegExp("^"+right+"$","i")
+                    
                 };
                 return ret
             }
-            if(fx.callee.name==="$regex"){
-                var left=js_parse(fx.arguments[0],params,true);
-                var right=js_parse(fx.arguments[1],params,true);
-                ret={}
-                if(fx.arguments.length==2){
-                    ret[left]={
-                        $regex: new RegExp(right)
-                    };    
-                }
-                else if(fx.arguments.length==3) {
-                    ret[left]={
-                        $regex: new RegExp(right,js_parse(fx.arguments[2],params,true))
-                    }; 
-                }
-                
-                return ret;
+        }
+        var mOp=op[fx.operator];
+        if(!forSelect && matchOp.indexOf(mOp)>-1){
+            ret={};
+            ret[left]={};
+            ret[left][mOp]=right;
+            return ret;
+            
+        }
+        ret[op[fx.operator]]=[left,right];
+            return ret;
+        
+        
+    }
+    if(fx.type==='LogicalExpression'){
+        var ret={}
+        ret[logical[fx.operator]]=[js_parse(fx.left,params,true),js_parse(fx.right,params,true)]
+        return ret
+    }
+    if(fx.type==='BinaryExpression'){
+        
+    }
+    if(fx.type==='CallExpression'){
+        if(fx.callee.name==="$exists"){
+            ret={};
+            ret[js_parse(fx.arguments[0],params,true)]={
+                $exists:1
             }
-            if(fx.callee.name==="$iif"){
-                return {
-                    $cond: {
-                       "if": js_parse(fx.arguments[0],params,true),
-                       "then": js_parse(fx.arguments[1],params,true),
-                       "else": js_parse(fx.arguments[2],params,true)
-                    }
-                }
+            return ret;
+        }
+        if(avgFuncs.indexOf(fx.callee.name)>-1){
+            ret={};
+            ret[fx.callee.name]=js_parse(fx.arguments[0],params,true);
+            return ret;
+        }
+        if(fx.callee.name=="getParams"){
+            
+            return params[fx.arguments[0].value];
+        }
+        if(fx.callee.name==='expr'){
+            ret={
+                $expr:js_parse(fx.arguments[0],params,true)
+            };
+            return ret
+        }
+        if(fx.callee.name==="$regex"){
+            var left=js_parse(fx.arguments[0],params,true);
+            var right=js_parse(fx.arguments[1],params,true);
+            ret={}
+            if(fx.arguments.length==2){
+                ret[left]={
+                    $regex: new RegExp(right)
+                };    
             }
-            if(fx.callee.name=="switch"){
-               
-                ret={
-                    $switch:{
-                        branches:[],
-                        default:js_parse(fx.arguments[fx.arguments.length-1],params,true)
-                    }
-                }
-                for(var i=0;i<fx.arguments.length-1;i++){
-                    ret.$switch.branches.push(js_parse(fx.arguments[i],params,true));
-                }
-                return ret;
+            else if(fx.arguments.length==3) {
+                ret[left]={
+                    $regex: new RegExp(right,js_parse(fx.arguments[2],params,true))
+                }; 
             }
-            if(fx.callee.name=="case"){
-                return {
-                    case:js_parse(fx.arguments[0],params,true),
-                    then:js_parse(fx.arguments[1],params,true)
+            
+            return ret;
+        }
+        if(fx.callee.name==="$iif"){
+            return {
+                $cond: {
+                   "if": js_parse(fx.arguments[0],params,true),
+                   "then": js_parse(fx.arguments[1],params,true),
+                   "else": js_parse(fx.arguments[2],params,true)
                 }
-            }
-            else {
-                ret={};
-                var args=[];
-                for(var i=0;i<fx.arguments.length;i++){
-                    args.push(js_parse(fx.arguments[i],params,true))
-                }
-                ret[fx.callee.name]=args;
-                return ret;
             }
         }
+        if(fx.callee.name=="switch"){
+           
+            ret={
+                $switch:{
+                    branches:[],
+                    default:js_parse(fx.arguments[fx.arguments.length-1],params,true)
+                }
+            }
+            for(var i=0;i<fx.arguments.length-1;i++){
+                ret.$switch.branches.push(js_parse(fx.arguments[i],params,true));
+            }
+            return ret;
+        }
+        if(fx.callee.name=="case"){
+            return {
+                case:js_parse(fx.arguments[0],params,true),
+                then:js_parse(fx.arguments[1],params,true)
+            }
+        }
+        else {
+            ret={};
+            var args=[];
+            for(var i=0;i<fx.arguments.length;i++){
+                args.push(js_parse(fx.arguments[i],params,true))
+            }
+            ret[fx.callee.name]=args;
+            return ret;
+        }
+    }
     }
 }) 
 db.system.js.save(
@@ -841,6 +861,7 @@ db.system.js.save(
 		}
 	}
 );
+
 db.system.js.save({
     _id:"query",
     value:function(name){
@@ -848,6 +869,28 @@ db.system.js.save({
             this.name=name;
             this.pipeline=[];
             
+        }
+        qr.prototype.parse=function(obj,params){
+           
+           
+           
+           
+           
+            if(typeof obj ==="string"){
+                return js_parse(jsep(obj,params),params,true);
+            }
+            var txt=JSON.stringify(obj);
+            if(txt[0]==="{" && txt[txt.length-1]==="}"){
+                var ret={};
+                var keys= Object.keys(obj);
+                for(var i=0;i<keys.length;i++){
+                    var key=keys[i];
+                    var val= obj[key];
+                    ret[key]=this.parse(val,params)
+                }
+                return ret;
+            }
+            return obj
         }
         qr.prototype.stages=function(){
             for(var i=0;i<arguments.length;i++){
@@ -861,18 +904,8 @@ db.system.js.save({
 		    for(var i=1;i<arguments.length;i++){
 		        params.push(arguments[i])
 		    }
-		    var data={}
-		    var keys=Object.keys(selectors);
-		    for(var i=0;i<keys.length;i++){
-		        var key=keys[i];
-		        var val= selectors[key];
-		        if(typeof val==="string"){
-		            data[key]=js_parse(jsep(val,params),params);
-		        }
-		        else {
-		            data[key]=val
-		        }
-		    }
+		    var data=this.parse(selectors,params);
+		    
 		    this.pipeline.push({
 		        $project:data
 		    })
@@ -880,35 +913,29 @@ db.system.js.save({
             return this;
         }  
         qr.prototype.addFields=function(){
-            if(arguments.length==0) {
-                return this;
-            }
-            var items=arguments[0].split(',');
-            var params=[];
-            for(var i=1;i<arguments.length;i++){
-                params.push(arguments[i]);
-            }
-            var addFields={
-                
-            }
-            for(var i=0;i<items.length;i++){
-                var item=items[i]
-                if(item.indexOf("=")==-1){
-                    addFields[item]=1    
-                }
-                else {
-                    field=item.split('=')[0];
-                    _expr=item.substring(field.length+1,item.length)
-                    addFields[field]=expr(_expr,params);
-                }
-            }
-            this.pipeline.push({
-                $addFields:addFields
-            })
+            var selectors=arguments[0];
+            var params =[];
+		    for(var i=1;i<arguments.length;i++){
+		        params.push(arguments[i])
+		    }
+		    var data=this.parse(selectors,params);
+		    this.pipeline.push({
+		        $addFields:data
+		    })
+            //js_parse(jsep(expr,params),params);
             return this;
         }  
-        qr.prototype.items=function(){
-            return db.getCollection(this.name).aggregate(this.pipeline)
+        qr.prototype.items=function(options){
+            var op={
+                allowDiskUse:true
+            }
+            if(options){
+                var keys=Object.keys(op);
+                for(var i=0;i<keys.length;i++){
+                    op[keys[i]]=options[keys[i]];
+                }
+            }
+            return db.getCollection(this.name).aggregate(this.pipeline,op);
         }
         qr.prototype.item=function(){
             var ret=this.limit(1).items().toArray();
@@ -1052,23 +1079,128 @@ db.system.js.save({
                 return this;
             }
             else{
-                var keys=Object.keys(_obj);
-                var data={}
-                 for(var i=0;i<keys.length;i++){
-    		        var key=keys[i];
-    		        var val= _obj[key];
-    		        if(typeof val==="string"){
-    		            data[key]=js_parse(jsep(val,params),params);
-    		        }
-    		        else {
-    		            data[key]=val
-    		        }
-    		    }
+                
+                var data=this.parse(_obj,params);
     		    this.pipeline.push({
                     $replaceRoot: { newRoot: data }
                 });
                 return this;
             }
+        }
+        qr.prototype.bucket=function(){
+            var data= arguments[0];
+             var params =[];
+		    for(var i=1;i<arguments.length;i++){
+		        params.push(arguments[i])
+		    }
+		    if(!data.groupBy){
+		        throw(new Error("'groupBy' was not found"))
+		    }
+		    if(data.boundaries===undefined){
+		        throw(new Error("'boundaries' was not found"))
+		    }
+		    if(!data.default){
+		        throw(new Error("'default' was not found"))
+		    }
+		    if(!data.output){
+		        throw(new Error("'output' was not found"))
+		    }
+            // if(!(data.boundaries.push)){
+            //     throw(new Error("'boundaries' must be an array"))
+            // }
+            if(typeof data.groupBy!=="string"){
+                throw(new Error("'groupBy' must be a string"))
+            }
+            var groupBy=js_parse(jsep(data.groupBy,params),params);
+            var output=this.parse(data.output,params);
+            var _default=this.parse(data.default,params);
+            this.pipeline.push({
+                $bucket:{
+                    groupBy:groupBy,
+                    boundaries:data.boundaries,
+                    default:_default,
+                    output:output
+                    
+                }
+            })
+            return this;
+        }
+        qr.prototype.bucketAuto=function(){
+             var data= arguments[0];
+             var params =[];
+             if(!data.groupBy){
+                 throw(new Error('bucketAuto need a "groupBy" fields'))
+             }
+             if(data.buckets===undefined){
+                 throw(new Error('bucketAuto need a "buckets" fields with numeric data type'))
+             }
+             var groupBy=js_parse(jsep(data.groupBy,params),params);
+             if(!dara.output){
+                 this.pipeline.push({
+                     $bucketAuto:{
+                         groupBy:groupBy,
+                         buckets:data.buckets
+                     }
+                 });
+             }
+             else {
+                 this.pipeline.push({
+                     $bucketAuto:{
+                         groupBy:groupBy,
+                         buckets:data.buckets,
+                         output:this.parse(data.output,params)
+                     }
+                 });
+             }
+             return this;
+        }
+        qr.prototype.facet=function(){
+            var data=arguments[0];
+            var keys=Object.keys(data);
+            var _facet={}
+            for(var i=0;i<keys.length;i++){
+                var key=keys[i];
+                var val = data[key];
+                if(!val.pipeline) {
+                    throw(new Error("'"+key+"' is not 'query'"))
+                }
+                _facet[key]=val.pipeline;
+                
+            }
+            this.pipeline={
+                $facet:_facet
+            }
+            return this;
+        }
+        qr.prototype.group=function(){
+            var selectors=arguments[0];
+            var params =[];
+		    for(var i=1;i<arguments.length;i++){
+		        params.push(arguments[i])
+		    }
+		    var data=this.parse(selectors,params);
+		    this.pipeline.push({
+		        $group:data
+		    });
+		    return this;
+        }
+        qr.prototype.find=function(){
+            var selectors=arguments[0];
+            var params =[];
+		    for(var i=1;i<arguments.length;i++){
+		        params.push(arguments[i])
+		    }
+		    var _expr= js_parse(jsep(selectors,params),params);
+		    return db.getCollection(this.name).find(_expr);
+        }
+        qr.prototype.findOne=function(){
+            var selectors=arguments[0];
+            var params =[];
+		    for(var i=1;i<arguments.length;i++){
+		        params.push(arguments[i])
+		    }
+		    var _expr= js_parse(jsep(selectors,params),params);
+		    return db.getCollection(this.name).findOne(_expr);
         }
         return new qr(name)
     }

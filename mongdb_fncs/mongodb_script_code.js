@@ -1,5 +1,6 @@
+use test001
 db.loadServerScripts();
-var x=jsep("switch(case(a>1,1),case(b>1,2),3)",["XX"]);
+var x=jsep("a+b+c",["XX"],true);
 
 // var p= x('1+1')
 // console.log(p)
@@ -10,6 +11,7 @@ var x=jsep("switch(case(a>1,1),case(b>1,2),3)",["XX"]);
 
 
 function js_parse(fx,params,forSelect){
+    var avgFuncs=";$avg;$sum;$min;$max;$push;"
     var ret={};
     var op={
         "==":"$eq",
@@ -24,6 +26,7 @@ function js_parse(fx,params,forSelect){
         "/":"$divide",
         "%":"$mod"
     }
+    var mathOp=";$add;$subtract;$multiply;$divide;$mod;"
     var logical={
         "&&":"$and",
         "||":"$or"
@@ -33,7 +36,7 @@ function js_parse(fx,params,forSelect){
         return fx.name;
     }
     if(fx.type==='MemberExpression'){
-        var left=js_parse(fx.object,params,false)
+        var left=js_parse(fx.object,params,forSelect)
         return left+"."+fx.property.name
     }
     if(fx.type=='Literal'){
@@ -41,8 +44,8 @@ function js_parse(fx,params,forSelect){
     }
     if(fx.type==='BinaryExpression'){
         ret={}
-        var right = js_parse(fx.right,params,false)
-        var left = js_parse(fx.left,params,false)
+        var right = js_parse(fx.right,params,forSelect)
+        var left = js_parse(fx.left,params,forSelect)
         if(fx.operator=='=='){
         
             if(typeof right=="string"){
@@ -54,15 +57,8 @@ function js_parse(fx,params,forSelect){
                 return ret
             }
         }
-        if(typeof left==="string"){
-            ret[left]={}
-            ret[left][op[fx.operator]]=right
-            return ret    
-        }
-        else {
-            ret[op[fx.operator]]=[left,right];
+        ret[op[fx.operator]]=[left,right];
             return ret;
-        }
         
         
     }
@@ -75,6 +71,18 @@ function js_parse(fx,params,forSelect){
         
     }
     if(fx.type==='CallExpression'){
+        if(fx.callee.name==="$exists"){
+            ret={};
+            ret[js_parse(fx.arguments[0],params,true)]={
+                $exists:1
+            }
+            return ret;
+        }
+        if(avgFuncs.indexOf(fx.callee.name)>-1){
+            ret={};
+            ret[fx.callee.name]=js_parse(fx.arguments[0],params,true);
+            return ret;
+        }
         if(fx.callee.name=="getParams"){
             
             return params[fx.arguments[0].value];
