@@ -1,0 +1,10 @@
+db.loadServerScripts()
+query(db.getCollection("hrm.employees"))
+.lookup(
+db.getCollection("lv.HCSSYS_Departments"),
+"department_code",
+"department_code",
+"dep"
+)
+//.pipeline
+.items()

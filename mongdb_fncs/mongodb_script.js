@@ -1,4 +1,4 @@
-use test001
+use hrm
 db.system.js.save(
 	{
 	  _id: "jsep",
@@ -731,8 +731,8 @@ db.system.js.save({
     }
     if(fx.type==='BinaryExpression'){
         ret={}
-        var right = js_parse(fx.right,params,forSelect)
-        var left = js_parse(fx.left,params,forSelect)
+        var right = js_parse(fx.right,params,true)
+        var left = js_parse(fx.left,params,true)
         if(fx.operator=='=='){
         
             if(typeof right=="string"){
@@ -742,6 +742,11 @@ db.system.js.save({
                     
                 };
                 return ret
+            }
+            if(!forSelect){
+              ret={};
+              ret[left]=right;
+              return  ret;
             }
         }
         var mOp=op[fx.operator];
@@ -866,18 +871,21 @@ db.system.js.save({
     _id:"query",
     value:function(name){
         function qr(name){
+          if(typeof name==="string"){
             this.name=name;
+          }
+          else {
+            this.coll=name;
+          }
             this.pipeline=[];
             
         }
-        qr.prototype.parse=function(obj,params){
-           
-           
-           
-           
-           
+        qr.prototype.parse=function(obj,params,forMatch){
+          if(!forMatch){
+             forMatch=false;
+          }
             if(typeof obj ==="string"){
-                return js_parse(jsep(obj,params),params,true);
+                return js_parse(jsep(obj,params),params,!forMatch);
             }
             var txt=JSON.stringify(obj);
             if(txt[0]==="{" && txt[txt.length-1]==="}"){
@@ -886,7 +894,7 @@ db.system.js.save({
                 for(var i=0;i<keys.length;i++){
                     var key=keys[i];
                     var val= obj[key];
-                    ret[key]=this.parse(val,params)
+                    ret[key]=this.parse(val,params,forMatch)
                 }
                 return ret;
             }
@@ -935,7 +943,12 @@ db.system.js.save({
                     op[keys[i]]=options[keys[i]];
                 }
             }
-            return db.getCollection(this.name).aggregate(this.pipeline,op);
+            if(this.coll){
+              	return this.coll.aggregate(this.pipeline,op);
+            }
+            else {
+            	return db.getCollection(this.name).aggregate(this.pipeline,op);
+            }
         }
         qr.prototype.item=function(){
             var ret=this.limit(1).items().toArray();
@@ -1172,6 +1185,27 @@ db.system.js.save({
             }
             return this;
         }
+        qr.prototype.lookup=function(from,localField,foreignField,as){
+           var _from=from;
+           if(typeof from!="string"){
+	             var txt=from.toString();
+             	_from=txt.substring(db.getName().length+1,txt.length)
+           }
+          	this.pipeline.push({
+          	  	$lookup:{
+          	  	  	from:_from,
+          	  	  	localField:localField,
+          	  	  	foreignField:foreignField,
+          	  	  	as:as
+          	  	}
+          	});
+          	return this;
+        }
+        qr.prototype.join=function(from,localField,foreignField,as){
+          this.lookup(from,localField,foreignField,as);
+          this.unwind("$"+as);
+          return this;
+        }
         qr.prototype.group=function(){
             var selectors=arguments[0];
             var params =[];
@@ -1185,25 +1219,346 @@ db.system.js.save({
 		    return this;
         }
         qr.prototype.find=function(){
+          if(arguments.length==0){
+          	  	return db.getCollection(this.name).find({});
+          	}
             var selectors=arguments[0];
             var params =[];
 		    for(var i=1;i<arguments.length;i++){
 		        params.push(arguments[i])
 		    }
 		    var _expr= js_parse(jsep(selectors,params),params);
-		    return db.getCollection(this.name).find(_expr);
+		    if(this.coll){
+		      	return this.coll.find(_expr);
+		    }
+		    else {
+		      return db.getCollection(this.name).find(_expr);
+		    }
         }
         qr.prototype.findOne=function(){
+          	if(arguments.length==0){
+          	  	return db.getCollection(this.name).findOne({});
+          	}
             var selectors=arguments[0];
             var params =[];
 		    for(var i=1;i<arguments.length;i++){
 		        params.push(arguments[i])
 		    }
 		    var _expr= js_parse(jsep(selectors,params),params);
-		    return db.getCollection(this.name).findOne(_expr);
+		    if(this.coll){
+		      	return this.coll.findOne(_expr);
+		    }
+		    else {
+		    	return db.getCollection(this.name).findOne(_expr);
+		    }
         }
+       	qr.prototype.insert=function(){
+       	  	var ret=new entity(this,null);
+       	  	var isArray=arguments[0].push!=undefined;
+       	  	if(arguments.length==1){
+       	  	   ret.insert(arguments[0]);
+       	  	   return ret;
+       	  	}
+       	  	else {
+       	  	  var data=[];
+       	  	  for(var i=0;i<arguments.length;i++){
+       	  	     data.push(arguments[i]);
+       	  	  }
+       	  	  ret.insert(data);
+       	  	  return ret;
+       	  	}
+       	}
+       	qr.prototype.push=function(data){
+       	  	var ret= new entity(this);
+       	  	if(!ret._updateData){
+	      	  	ret._updateData={};
+	      	}
+	      	if(!ret._updateData.$push){
+	      	  ret._updateData.$push={};
+	      	}
+	      	var keys=Object.keys(data);
+	      	for(var i=0;i<keys.length;i++){
+	      	  ret._updateData.$push[keys[i]]=data[keys[i]];
+	      	}
+	      	return ret;
+       	}
+       	entity.prototype.addToSet=function(data){
+       	   var ret= new entity(this);
+	      	if(!ret._updateData){
+	      	  	ret._updateData={};
+	      	}
+	      	if(!ret._updateData.$addToSet){
+	      	  ret._updateData.$addToSet={};
+	      	}
+	      	var keys=Object.keys(data);
+	      	for(var i=0;i<keys.length;i++){
+	      	  ret._updateData.$addToSet[keys[i]]=data[keys[i]];
+	      	}
+	      	return ret;
+	    }
+       	qr.prototype.pull=function(){
+       	  	var selectors=arguments[0];
+            var params =[];
+            var ret =new entity(this);
+		    for(var i=1;i<arguments.length;i++){
+		        params.push(arguments[i])
+		    }
+		    if(!ret._updateData){
+	      	  	ret._updateData={};
+	      	}
+	      	if(!ret._updateData.$pull){
+	      	  ret._updateData.$pull={};
+	      	}
+		    if(typeof selectors == "string"){
+	
+		      	var _expr=js_parse(jsep(selectors,params),params);
+		      	var keys=Object.keys(_expr);
+	      		ret._updateData.$pull[keys[0]]=_expr[keys[0]];
+		      	return ret;
+		    }
+		    else {
+		    	var _expr= ret._owner.parse(selectors,params,true);
+		    	var keys=Object.keys(_expr);
+	      		for(var i=0;i<keys.length;i++){
+	      	 	  ret._updateData.$pull[keys[i]]=_expr[keys[i]];
+		      	}
+		      	return ret;
+		    }
+       	}
+       	entity.prototype.pullAll=function(){
+	      	var selectors=arguments[0];
+            var params =[];
+             var ret =new entity(this);
+		    for(var i=1;i<arguments.length;i++){
+		        params.push(arguments[i])
+		    }
+		    if(!ret._updateData){
+	      	  	ret._updateData={};
+	      	}
+	      	if(!ret._updateData.$pullAll){
+	      	   ret._updateData.$pullAll={};
+	      	}
+	      	
+		    if(typeof selectors == "string"){
+	
+		      	var _expr=js_parse(jsep(selectors,params),params);
+		      	var keys=Object.keys(_expr);
+	      		ret._updateData.$pullAll[keys[0]]=_expr[keys[0]];
+		      	return ret;
+		    }
+		    else {
+		    	var _expr= ret._owner.parse(selectors,params,true);
+		    	var keys=Object.keys(_expr);
+	      		for(var i=0;i<keys.length;i++){
+	      	 	  ret._updateData.$pullAll[keys[i]]=_expr[keys[i]];
+		      	}
+		      	return ret;
+		    }
+	    }
+	    entity.prototype.pop=function(data){
+	      var ret =new entity(this);
+	      	if(!ret._updateData){
+	      	  	ret._updateData={};
+	      	}
+	      	if(!ret._updateData.$pop){
+	      	  ret._updateData.$pop={};
+	      	}
+	      	var keys=Object.keys(data);
+	      	for(var i=0;i<keys.length;i++){
+	      	  ret._updateData.$pop[keys[i]]=data[keys[i]];
+	      	}
+	      	return ret;
+	    }
+       	qr.prototype.set=function(data){
+       	   var ret=new entity(this);
+       	  	if(!ret._updateData){
+	      	  	ret._updateData={};
+	      	}
+	      	if(!ret._updateData.$set){
+	      	  ret._updateData.$set={};
+	      	}
+	      	var keys=Object.keys(data);
+	      	for(var i=0;i<keys.length;i++){
+	      	  ret._updateData.$set[keys[i]]=data[keys[i]];
+	      	}
+	      	return ret;
+       	}
+        qr.prototype.where=function(){
+          	var selectors=arguments[0];
+            var params =[];
+		    for(var i=1;i<arguments.length;i++){
+		        params.push(arguments[i]);
+		    }
+		    var _expr= js_parse(jsep(selectors,params),params);
+          	return new entity(this,_expr);		
+        }
+        //-----------------------------------------
+        function entity(qr,_expr){
+            this._owner=qr;
+      		if(qr.name){
+      		  this.coll=db.getCollection(qr.name);
+      		}
+      		else {
+      		  this.coll=qr.coll;
+      		}
+      		
+	      	
+    	  	this._expr=_expr;
+    	}
+    	entity.prototype.commit=function(){
+    	  	if(this._insertItem!=null){
+    	  	   return this.coll.insertOne(this._insertItem);
+    	  	}
+    	  	if(this._insertItems!=null){
+    	  	   return this.coll.insertMany(this._insertItems);
+    	  	}
+    	  	if(this._updateData){
+    	  	  if(this._expr){
+    	  	  	return this.coll.updateMany(this._expr,this._updateData);
+    	  	  }
+    	  	  else {
+    	  	    return this.coll.updateMany({},this._updateData);
+    	  	  }
+    	  	}
+    	}
+	    entity.prototype.insert=function(){
+	      	this._insertItem=null;
+	      	this._insertItems=null;
+    	  	var isArray=arguments[0].push!=undefined;
+    	  	if(isArray){
+    	  	   	this._insertItems=arguments[0];
+    	  	   	return this;
+    	  	}
+    	  	if(arguments.length==1){
+    	  	  	this._insertItem=arguments[0];
+    	  	}
+    	  	else {
+    	  	  	this._insertItems=[];
+    	  	  	for(var i=0;i<arguments.length;i++){
+    	  	  	 	this._insertItems.push(arguments[i]); 
+    	  	  	}
+				return this;
+    	  	}
+      		
+	    }
+	    
+	    entity.prototype.set=function(data){
+	      	if(!this._updateData){
+	      	  	this._updateData={};
+	      	}
+	      	if(!this._updateData.$set){
+	      	  this._updateData.$set={};
+	      	}
+	      	var keys=Object.keys(data);
+	      	for(var i=0;i<keys.length;i++){
+	      	  this._updateData.$set[keys[i]]=data[keys[i]];
+	      	}
+	      	return this;
+	    }
+	    entity.prototype.push=function(data){
+	      	if(!this._updateData){
+	      	  	this._updateData={};
+	      	}
+	      	if(!this._updateData.$push){
+	      	  this._updateData.$push={};
+	      	}
+	      	var keys=Object.keys(data);
+	      	for(var i=0;i<keys.length;i++){
+	      	  this._updateData.$push[keys[i]]=data[keys[i]];
+	      	}
+	      	return this;
+	    }
+	    entity.prototype.pullAll=function(){
+	      	var selectors=arguments[0];
+            var params =[];
+            
+		    for(var i=1;i<arguments.length;i++){
+		        params.push(arguments[i])
+		    }
+		    if(!this._updateData){
+	      	  	this._updateData={};
+	      	}
+	      	if(!this._updateData.$pullAll){
+	      	  this._updateData.$pullAll={};
+	      	}
+		    if(typeof selectors == "string"){
+	
+		      	var _expr=js_parse(jsep(selectors,params),params);
+		      	var keys=Object.keys(_expr);
+	      		this._updateData.$pullAll[keys[0]]=_expr[keys[0]];
+		      	return this;
+		    }
+		    else {
+		    	var _expr= this._owner.parse(selectors,params,true);
+		    	var keys=Object.keys(_expr);
+	      		for(var i=0;i<keys.length;i++){
+	      	 	  this._updateData.$pullAll[keys[i]]=_expr[keys[i]];
+		      	}
+		      	return this;
+		    }
+	    }
+	    entity.prototype.pull=function(){
+	      	var selectors=arguments[0];
+            var params =[];
+            
+		    for(var i=1;i<arguments.length;i++){
+		        params.push(arguments[i])
+		    }
+		    if(!this._updateData){
+	      	  	this._updateData={};
+	      	}
+	      	if(!this._updateData.$pull){
+	      	  this._updateData.$pull={};
+	      	}
+		    if(typeof selectors == "string"){
+	
+		      	var _expr=js_parse(jsep(selectors,params),params);
+		      	var keys=Object.keys(_expr);
+	      		this._updateData.$pull[keys[0]]=_expr[keys[0]];
+		      	return this;
+		    }
+		    else {
+		    	var _expr= this._owner.parse(selectors,params,true);
+		    	var keys=Object.keys(_expr);
+	      		for(var i=0;i<keys.length;i++){
+	      	 	  this._updateData.$pull[keys[i]]=_expr[keys[i]];
+		      	}
+		      	return this;
+		    }
+		    
+		    
+	      	
+	    }
+	    entity.prototype.addToSet=function(data){
+	      	if(!this._updateData){
+	      	  	this._updateData={};
+	      	}
+	      	if(!this._updateData.$addToSet){
+	      	  this._updateData.$addToSet={};
+	      	}
+	      	var keys=Object.keys(data);
+	      	for(var i=0;i<keys.length;i++){
+	      	  this._updateData.$addToSet[keys[i]]=data[keys[i]];
+	      	}
+	      	return this;
+	    }
+	    entity.prototype.pop=function(data){
+	      	if(!this._updateData){
+	      	  	this._updateData={};
+	      	}
+	      	if(!this._updateData.$pop){
+	      	  this._updateData.$pop={};
+	      	}
+	      	var keys=Object.keys(data);
+	      	for(var i=0;i<keys.length;i++){
+	      	  this._updateData.$pop[keys[i]]=data[keys[i]];
+	      	}
+	      	return this;
+	    }
         return new qr(name)
     }
+    
+   
 })
 
 db.loadServerScripts()
