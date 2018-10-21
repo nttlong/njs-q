@@ -784,8 +784,8 @@ db.system.js.save({
             return ret;
         }
         if(fx.callee.name=="getParams"){
-            
-            return params[fx.arguments[0].value];
+           
+          return params[fx.arguments[0].value];
         }
         if(fx.callee.name==='expr'){
             ret={
@@ -838,6 +838,15 @@ db.system.js.save({
                 then:js_parse(fx.arguments[1],params,true)
             }
         }
+        if(fx.callee.name=="$in"){
+          	var ret={};
+          	
+          	var field=js_parse(fx.arguments[0],params,true);
+          	ret[field]={};
+          	ret[field]["$in"]=js_parse(fx.arguments[1],params,true);
+          	
+            return ret;
+        }
         else {
             ret={};
             var args=[];
@@ -853,15 +862,12 @@ db.system.js.save({
 db.system.js.save(
 	{
 		_id:"expr",
-		value:function(){
+		value:function(x,p){
 		   
-		    var expr=arguments[0];
+		    var expr=x;
 
-		    var params =[];
-		    for(var i=1;i<arguments.length;i++){
-		        params.push(arguments[i])
-		    }
-		
+		    var params =p;
+		   
 			return js_parse(jsep(expr,params),params);
 		}
 	}
@@ -875,7 +881,10 @@ db.system.js.save({
             this.name=name;
           }
           else {
-            this.coll=name;
+            
+            var txt=name.toString();
+            _name=txt.substring(db.getName().length+1,txt.length)
+            this.name=_name;
           }
             this.pipeline=[];
             
@@ -965,6 +974,7 @@ db.system.js.save({
 		    for(var i=1;i<arguments.length;i++){
 		        params.push(arguments[i])
 		    }
+		    
 		    this.pipeline.push({
 		        $match: expr(_expr,params)
 		    });
@@ -1206,6 +1216,18 @@ db.system.js.save({
           this.unwind("$"+as);
           return this;
         }
+        qr.prototype.leftJoin=function(from,localField,foreignField,as){
+          this.lookup(from,localField,foreignField,as);
+          this.unwind("$"+as,true);
+          return this;
+        }
+        qr.prototype.rightJoin=function(from,localField,foreignField,as){
+          var ret=from;
+          ret= new qr(from);
+          ret.lookup(this,foreignField,localField,as);
+          ret.unwind("$"+as,true);
+          return ret;
+        }
         qr.prototype.group=function(){
             var selectors=arguments[0];
             var params =[];
@@ -1217,6 +1239,18 @@ db.system.js.save({
 		        $group:data
 		    });
 		    return this;
+        }
+        qr.prototype.out=function(name){
+          	this.pipeline.push({
+          	   $out:name
+          	});
+          	this.items();
+          	return new query(name);
+        }
+        qr.prototype.createView=function(name,options){
+           
+          	var ret=db.createView(name, this.name, this.pipeline, options);
+          	return ret;
         }
         qr.prototype.find=function(){
           if(arguments.length==0){
@@ -1355,7 +1389,7 @@ db.system.js.save({
 		      	return ret;
 		    }
 	    }
-	    entity.prototype.pop=function(data){
+	    qr.prototype.pop=function(data){
 	      var ret =new entity(this);
 	      	if(!ret._updateData){
 	      	  	ret._updateData={};
@@ -1404,6 +1438,77 @@ db.system.js.save({
       		
 	      	
     	  	this._expr=_expr;
+    	}
+    	entity.prototype.items=function(){
+    	  	if(this._expr){
+    	  	  	return this.coll.find(this._expr);
+    	  	}
+    	  	else {
+    	  	   return this.coll.find({});
+    	  	}
+    	}
+    	entity.prototype.item=function(){
+    	  	if(this._expr){
+    	  	  	return this.coll.findOne(this._expr);
+    	  	}
+    	  	else {
+    	  	   return this.coll.findOne({});
+    	  	}
+    	}
+    	entity.prototype.out=function(collectionName){
+    	  	if(this._expr){
+    	  	  	var ret = this.coll.aggregate([
+    	  	  		{
+    	  	  		  $match:this._expr
+    	  	  		},
+    	  	  		{
+    	  	  		  $out:collectionName
+    	  	  		}
+    	  	  	]);
+    	  	  	return new query(collectionName);
+    	  	}
+    	  	else {
+    	  	   var ret = this.coll.aggregate([
+    	  	  		
+    	  	  		{
+    	  	  		  $out:collectionName
+    	  	  		}
+    	  	  	]);
+    	  	  	return new query(collectionName);
+    	  	}
+    	}
+    	entity.prototype.count=function(){
+    	  
+    	  	if(this._expr){
+    	  	  	var ret = this.coll.aggregate([
+    	  	  		{
+    	  	  		  $match:this._expr
+    	  	  		},
+    	  	  		{
+    	  	  		  $count:"retCount"
+    	  	  		}
+    	  	  	]).toArray();
+    	  	  	if(ret.length==0){
+    	  	  	   return 0;
+    	  	  	}
+    	  	  	else {
+    	  	  	  return ret[0].retCount;
+    	  	  	}
+    	  	}
+    	  	else {
+    	  	   var ret = this.coll.aggregate([
+    	  	  		
+    	  	  		{
+    	  	  		  $count:"ret"
+    	  	  		}
+    	  	  	]).toArray();
+    	  	  	if(ret.length==0){
+    	  	  	   return 0;
+    	  	  	}
+    	  	  	else {
+    	  	  	  return ret[0].retCount;
+    	  	  	}
+    	  	}
     	}
     	entity.prototype.commit=function(){
     	  	if(this._insertItem!=null){
