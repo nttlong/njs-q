@@ -1,4 +1,10 @@
-use hrm
+use hrm1
+db.system.js.save({
+  _id:"define",
+  value:function(name,fn){
+     
+  }
+})
 db.system.js.save(
 	{
 	  _id: "jsep",
