@@ -1,8 +1,26 @@
 use hrm1
 db.system.js.save({
-  _id:"define",
+  _id:"model",
+  value:function(name,required,properties){
+     db.createCollection(name, {
+   		validator: {
+     		 $jsonSchema: {
+         					bsonType: "object",
+         					required: required,
+            				properties: properties
+      						}
+   					}
+	})
+  }
+})
+db.system.js.save({
+  _id:"defineFunc",
   value:function(name,fn){
-     
+		db.system.js.save({
+		  	_id:name,
+		  	value:fn
+		});  
+		db.loadServerScripts();  
   }
 })
 db.system.js.save(
@@ -1643,7 +1661,9 @@ db.system.js.save({
 	      	}
 	      	var keys=Object.keys(data);
 	      	for(var i=0;i<keys.length;i++){
-	      	  ret._updateData.$set[keys[i]]=data[keys[i]];
+	      	  if(keys[i]!="_id"){
+	      	   ret._updateData.$set[keys[i]]=data[keys[i]];
+	      	  }
 	      	}
 	      	return ret;
        	}
@@ -1786,7 +1806,9 @@ db.system.js.save({
 	      	}
 	      	var keys=Object.keys(data);
 	      	for(var i=0;i<keys.length;i++){
-	      	  this._updateData.$set[keys[i]]=data[keys[i]];
+	      	  if(keys[i]!="_id"){
+	      	   this._updateData.$set[keys[i]]=data[keys[i]];
+	      	  }
 	      	}
 	      	return this;
 	    }
