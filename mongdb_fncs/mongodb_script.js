@@ -1075,12 +1075,12 @@ db.system.js.save({
             this.pipeline=[];
             
         }
-        qr.prototype.parse=function(obj,params,forMatch){
+        qr.prototype.parse=function(obj,params,forMatch,isSecond){
           if(!forMatch){
              forMatch=false;
           }
             if(typeof obj ==="string"){
-                return js_parse(jsep(obj,params),params,!forMatch);
+              return js_parse(jsep(obj,params),params,!forMatch);
             }
             var txt=JSON.stringify(obj);
             if(txt[0]==="{" && txt[txt.length-1]==="}"){
@@ -1089,7 +1089,14 @@ db.system.js.save({
                 for(var i=0;i<keys.length;i++){
                     var key=keys[i];
                     var val= obj[key];
-                    ret[key]=this.parse(val,params,forMatch)
+                    var r=this.parse(val,params,forMatch);
+                    if(typeof r==="string"){
+                      ret[key]="$"+this.parse(val,params,forMatch)
+                    }
+                    else {
+                      ret[key]=this.parse(val,params,forMatch)	
+                    }
+                    
                 }
                 return ret;
             }
