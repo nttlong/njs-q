@@ -1,4 +1,4 @@
-use hrm1
+use hrm
 db.system.js.save({
   _id:"model",
   value:function(name,required,properties){
@@ -1110,10 +1110,12 @@ db.system.js.save({
         }
         qr.prototype.project=function(){
             var selectors=arguments[0];
+            
             var params =[];
 		    for(var i=1;i<arguments.length;i++){
 		        params.push(arguments[i])
 		    }
+		   
 		    var data=this.parse(selectors,params);
 		    
 		    this.pipeline.push({
@@ -1167,7 +1169,7 @@ db.system.js.save({
 		    for(var i=1;i<arguments.length;i++){
 		        params.push(arguments[i])
 		    }
-		    
+		     db.debugs.insertOne(params)
 		    this.pipeline.push({
 		        $match: expr(_expr,params)
 		    });
