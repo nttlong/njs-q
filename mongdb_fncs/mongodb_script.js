@@ -693,10 +693,11 @@ db.system.js.save(
  )
 db.system.js.save({
     _id:"js_parse",
-    value:function(fx,params,forSelect){
+    value:function(fx,params,forSelect,forNot){
          if(!forSelect) {
         forSelect=false;
     }
+    
     var avgFuncs=";$avg;$sum;$min;$max;$push;"
     var ret={};
     var op={
@@ -718,7 +719,22 @@ db.system.js.save({
         "&&":"$and",
         "||":"$or"
     }
-   
+    if(fx.type==='UnaryExpression'){
+       if(fx.operator==="!"){
+         if(forSelect){
+           	var ret={$not:[]};
+           	for(var i=0;i<fx.argument.arguments.length;i++){
+           	  	ret.$not.push(js_parse(fx.argument,params,forSelect))
+           	}
+           	return ret;
+         }
+         else {
+         	var ret=js_parse(fx.argument,params,forSelect,true);
+         	
+         	return ret;
+         }
+       }
+    }
     if(fx.type==='Identifier'){
         return fx.name;
     }
@@ -734,20 +750,24 @@ db.system.js.save({
         var right = js_parse(fx.right,params,true)
         var left = js_parse(fx.left,params,true)
         if(fx.operator=='=='){
-        
-            if(typeof right=="string"){
+        	if(typeof left==='string'){
+            	if(typeof right=="string"){
                 
-                ret[left]={
-                    $regex:new RegExp("^"+right+"$","i")
+                	ret[left]={
+                 	   $regex:new RegExp("^"+right+"$","i")
                     
-                };
-                return ret
-            }
-            if(!forSelect){
-              ret={};
-              ret[left]=right;
-              return  ret;
-            }
+                	};
+                	return ret
+            	}
+            	if(!forSelect){
+             	 ret={};
+              	ret[left]=right;
+              	return  ret;
+            	}
+        	}
+        	else {
+        	  
+        	}
         }
         var mOp=op[fx.operator];
         if(!forSelect && matchOp.indexOf(mOp)>-1){
@@ -764,7 +784,7 @@ db.system.js.save({
     }
     if(fx.type==='LogicalExpression'){
         var ret={}
-        ret[logical[fx.operator]]=[js_parse(fx.left,params,true),js_parse(fx.right,params,true)]
+        ret[logical[fx.operator]]=[js_parse(fx.left,params,true),js_parse(fx.right,params,true,forNot)]
         return ret
     }
     if(fx.type==='BinaryExpression'){
@@ -773,14 +793,14 @@ db.system.js.save({
     if(fx.type==='CallExpression'){
         if(fx.callee.name==="$exists"){
             ret={};
-            ret[js_parse(fx.arguments[0],params,true)]={
-                $exists:1
+            ret[js_parse(fx.arguments[0],params,true,forNot)]={
+                $exists:(forNot?0:1)
             }
             return ret;
         }
         if(avgFuncs.indexOf(fx.callee.name)>-1){
             ret={};
-            ret[fx.callee.name]=js_parse(fx.arguments[0],params,true);
+            ret[fx.callee.name]=js_parse(fx.arguments[0],params,true,forNot);
             return ret;
         }
         if(fx.callee.name=="getParams"){
@@ -794,8 +814,8 @@ db.system.js.save({
             return ret
         }
         if(fx.callee.name==="$regex"){
-            var left=js_parse(fx.arguments[0],params,true);
-            var right=js_parse(fx.arguments[1],params,true);
+            var left=js_parse(fx.arguments[0],params,true,forNot);
+            var right=js_parse(fx.arguments[1],params,true,forNot);
             ret={}
             if(fx.arguments.length==2){
                 ret[left]={
@@ -804,7 +824,7 @@ db.system.js.save({
             }
             else if(fx.arguments.length==3) {
                 ret[left]={
-                    $regex: new RegExp(right,js_parse(fx.arguments[2],params,true))
+                    $regex: new RegExp(right,js_parse(fx.arguments[2],params,true,forNot))
                 }; 
             }
             
@@ -846,6 +866,68 @@ db.system.js.save({
           	ret[field]["$in"]=js_parse(fx.arguments[1],params,true);
           	
             return ret;
+        }
+        if(fx.callee.name==="$dateToString"){
+          	/*
+          		{ 	$dateToString: {
+				    date: <dateExpression>,
+    				format: <formatString>,
+    				timezone: <tzExpression>,
+    				onNull: <expression>
+				} }
+          	*/
+          	var paramIndexs=['date','format','timezone'];
+          	var ret={
+          	  	$dateToString:{}
+          	};
+          	for(var i=0;i<fx.arguments.length;i++){
+          	   ret.$dateToString[paramIndexs[i]]=js_parse(fx.arguments[i],params,true);
+          	}
+          	return ret;
+        }
+        if(fx.callee.name==="$dateFromString"){
+        	/*
+        		{ $dateFromString: {
+	   			  dateString: <dateStringExpression>,
+				     format: <formatStringExpression>,
+			     timezone: <tzExpression>,
+			     onError: <onErrorExpression>,
+			     onNull: <onNullExpression>
+				} }
+ 	       */
+ 	       var paramIndexs=['dateString','format','timezone','onNull','onError'];
+ 	       var ret={
+          	  	$dateFromString:{}
+          	};
+          	for(var i=0;i<fx.arguments.length;i++){
+          	   ret.$dateFromString[paramIndexs[i]]=js_parse(fx.arguments[i],params,true);
+          	}
+          	return ret;
+        }
+        if(fx.callee.name==="$type"){
+          if(fx.arguments.length==2){
+           var field=js_parse(fx.arguments[0],params,true);
+           var val=js_parse(fx.arguments[1],params,true);
+           var ret={};
+           
+           if(forNot){
+             	ret[field]={
+             	  $not:{
+             			$type: val
+             		}
+           		};
+           		return ret;
+           }
+           ret[field]={
+             	$type:val
+           };
+           return ret;
+          }
+          else {
+            	return {
+            	  	$type:js_parse(fx.arguments[0],params,true)
+            	}
+          }
         }
         else {
             ret={};
