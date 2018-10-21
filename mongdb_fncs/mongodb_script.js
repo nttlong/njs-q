@@ -693,12 +693,12 @@ db.system.js.save(
  )
 db.system.js.save({
     _id:"js_parse",
-    value:function(fx,params,forSelect,forNot){
+    value:function(fx,params,forSelect,forNot,prefix){
          if(!forSelect) {
         forSelect=false;
     }
     
-    var avgFuncs=";$avg;$sum;$min;$max;$push;"
+    var avgFuncs=";avg;sum;min;max;push;addToSet;"
     var ret={};
     var op={
         "==":"$eq",
@@ -736,11 +736,22 @@ db.system.js.save({
        }
     }
     if(fx.type==='Identifier'){
-        return fx.name;
+       if(prefix){
+         return prefix+fx.name;
+       }
+       else{
+         return fx.name;
+       }
+        
     }
     if(fx.type==='MemberExpression'){
-        var left=js_parse(fx.object,params,forSelect)
-        return left+"."+fx.property.name
+        var left=js_parse(fx.object,params,forSelect);
+        if(prefix){
+        	return prefix+left+"."+fx.property.name;
+        }
+        else {
+          return left+"."+fx.property.name
+        }
     }
     if(fx.type=='Literal'){
         return fx.value;
@@ -760,9 +771,14 @@ db.system.js.save({
                 	return ret
             	}
             	if(!forSelect){
-             	 ret={};
-              	ret[left]=right;
-              	return  ret;
+             	 	ret={};
+              		ret[left]=right;
+              		return  ret;
+            	}
+            	else {
+            	  return {
+            	     $eq:[left.right]
+            	  }
             	}
         	}
         	else {
@@ -791,16 +807,16 @@ db.system.js.save({
         
     }
     if(fx.type==='CallExpression'){
-        if(fx.callee.name==="$exists"){
-            ret={};
-            ret[js_parse(fx.arguments[0],params,true,forNot)]={
-                $exists:(forNot?0:1)
+        if(fx.callee.name==="exists"){
+           ret={};
+            ret[js_parse(fx.arguments[0],params,true,forNot,"$")]={
+                $exists:(forNot?false:true)
             }
             return ret;
         }
-        if(avgFuncs.indexOf(fx.callee.name)>-1){
+        if(avgFuncs.indexOf(";"+fx.callee.name+";")>-1){
             ret={};
-            ret[fx.callee.name]=js_parse(fx.arguments[0],params,true,forNot);
+            ret["$"+fx.callee.name]=js_parse(fx.arguments[0],params,true,forNot,"$");
             return ret;
         }
         if(fx.callee.name=="getParams"){
@@ -809,11 +825,11 @@ db.system.js.save({
         }
         if(fx.callee.name==='expr'){
             ret={
-                $expr:js_parse(fx.arguments[0],params,true)
+                $expr:js_parse(fx.arguments[0],params,true,forNot,"$")
             };
             return ret
         }
-        if(fx.callee.name==="$regex"){
+        if(fx.callee.name==="regex"){
             var left=js_parse(fx.arguments[0],params,true,forNot);
             var right=js_parse(fx.arguments[1],params,true,forNot);
             ret={}
@@ -830,12 +846,12 @@ db.system.js.save({
             
             return ret;
         }
-        if(fx.callee.name==="$iif"){
+        if(fx.callee.name==="iif"){
             return {
                 $cond: {
-                   "if": js_parse(fx.arguments[0],params,true),
-                   "then": js_parse(fx.arguments[1],params,true),
-                   "else": js_parse(fx.arguments[2],params,true)
+                   "if": js_parse(fx.arguments[0],params,true,forNot,"$"),
+                   "then": js_parse(fx.arguments[1],params,true,forNot,"$"),
+                   "else": js_parse(fx.arguments[2],params,true,forNot,"$")
                 }
             }
         }
@@ -844,30 +860,30 @@ db.system.js.save({
             ret={
                 $switch:{
                     branches:[],
-                    default:js_parse(fx.arguments[fx.arguments.length-1],params,true)
+                    default:js_parse(fx.arguments[fx.arguments.length-1],params,true,forNot,"$")
                 }
-            }
+            };
             for(var i=0;i<fx.arguments.length-1;i++){
-                ret.$switch.branches.push(js_parse(fx.arguments[i],params,true));
+                ret.$switch.branches.push(js_parse(fx.arguments[i],params,true,forNot,"$"));
             }
             return ret;
         }
         if(fx.callee.name=="case"){
             return {
-                case:js_parse(fx.arguments[0],params,true),
-                then:js_parse(fx.arguments[1],params,true)
+                case:js_parse(fx.arguments[0],params,true,"$"),
+                then:js_parse(fx.arguments[1],params,true,"$")
             }
         }
-        if(fx.callee.name=="$in"){
+        if(fx.callee.name=="in"){
           	var ret={};
           	
-          	var field=js_parse(fx.arguments[0],params,true);
+          	var field=js_parse(fx.arguments[0],params,true,forNot,"$");
           	ret[field]={};
-          	ret[field]["$in"]=js_parse(fx.arguments[1],params,true);
+          	ret[field]["$in"]=js_parse(fx.arguments[1],params,true,forNot,"$");
           	
             return ret;
         }
-        if(fx.callee.name==="$dateToString"){
+        if(fx.callee.name==="dateToString"){
           	/*
           		{ 	$dateToString: {
 				    date: <dateExpression>,
@@ -881,11 +897,11 @@ db.system.js.save({
           	  	$dateToString:{}
           	};
           	for(var i=0;i<fx.arguments.length;i++){
-          	   ret.$dateToString[paramIndexs[i]]=js_parse(fx.arguments[i],params,true);
+          	   ret.$dateToString[paramIndexs[i]]=js_parse(fx.arguments[i],params,true,forNot,"$");
           	}
           	return ret;
         }
-        if(fx.callee.name==="$dateFromString"){
+        if(fx.callee.name==="dateFromString"){
         	/*
         		{ $dateFromString: {
 	   			  dateString: <dateStringExpression>,
@@ -900,14 +916,75 @@ db.system.js.save({
           	  	$dateFromString:{}
           	};
           	for(var i=0;i<fx.arguments.length;i++){
-          	   ret.$dateFromString[paramIndexs[i]]=js_parse(fx.arguments[i],params,true);
+          	   ret.$dateFromString[paramIndexs[i]]=js_parse(fx.arguments[i],params,true,forNot,"$");
           	}
           	return ret;
         }
-        if(fx.callee.name==="$type"){
+        if(fx.callee.name==="dateToParts"){
+          	/*
+          		{
+				    $dateToParts: {
+				        'date' : <dateExpression>,
+				        'timezone' : <timezone>,
+				        'iso8601' : <boolean>
+				    }
+				}
+          	*/
+          	var paramIndexs=['date','format','timezone','iso8601'];
+          	var ret={
+          	  	$dateToParts:{}
+          	};
+          	for(var i=0;i<fx.arguments.length;i++){
+          	   ret.$dateToParts[paramIndexs[i]]=js_parse(fx.arguments[i],params,true,forNot,"$");
+          	}
+          	return ret;
+        }
+        if(fx.callee.name==="ceil"){
+          return {
+            	$ceil:js_parse(fx.arguments[0],params,true,forNot,"$")
+          }
+        }
+        if(fx.callee.name==="arrayToObject"){
+          return {
+            	$arrayToObject:js_parse(fx.arguments[0],params,true,forNot,"$")
+          }
+        }
+        if(fx.callee.name==="convert"){
+          	/*
+          		{
+				   $convert:
+				      {
+				         input: <expression>,
+					     to: <type expression>,
+				         onError: <expression>,  // Optional.
+				         onNull: <expression>    // Optional.
+ 				     }
+				}
+          	*/
+          	var paramIndexs=['input','to','onNull','onError'];
+          	var ret={
+          	  	$convert:{}
+          	};
+          	for(var i=0;i<fx.arguments.length;i++){
+          	   ret.$convert[paramIndexs[i]]=js_parse(fx.arguments[i],params,true,forNot,"$");
+          	}
+          	return ret;
+        }
+        if(fx.callee.name==="filter"){
+           //{ $filter: { input: <array>, as: <string>, cond: <expression> } }
+           var paramIndexs=['input','as','cond'];
+           var ret= {
+             	$filter:{}
+           }
+           for(var i=0;i<fx.arguments.length;i++){
+          	   ret.$filter[paramIndexs[i]]=js_parse(fx.arguments[i],params,true,forNot,"$");
+          	}
+          	return ret;
+        }
+        if(fx.callee.name==="type"){
           if(fx.arguments.length==2){
-           var field=js_parse(fx.arguments[0],params,true);
-           var val=js_parse(fx.arguments[1],params,true);
+           var field=js_parse(fx.arguments[0],params,true,forNot,"$");
+           var val=js_parse(fx.arguments[1],params,true,forNot,"$");
            var ret={};
            
            if(forNot){
@@ -925,17 +1002,22 @@ db.system.js.save({
           }
           else {
             	return {
-            	  	$type:js_parse(fx.arguments[0],params,true)
+            	  	$type:js_parse(fx.arguments[0],params,true,forNot,"$")
             	}
           }
+        }
+        else if(fx.callee.name==="size"){
+          	return {
+            	  	$size:js_parse(fx.arguments[0],params,true,forNot,"$")
+            	}
         }
         else {
             ret={};
             var args=[];
             for(var i=0;i<fx.arguments.length;i++){
-                args.push(js_parse(fx.arguments[i],params,true))
+                args.push(js_parse(fx.arguments[i],params,true,forNot,"$"))
             }
-            ret[fx.callee.name]=args;
+            ret["$"+fx.callee.name]=args;
             return ret;
         }
     }
@@ -962,11 +1044,9 @@ db.system.js.save({
           if(typeof name==="string"){
             this.name=name;
           }
-          else {
-            
-            var txt=name.toString();
-            _name=txt.substring(db.getName().length+1,txt.length)
-            this.name=_name;
+          else if(name._shortName) {
+           
+            this.name=name._shortName;
           }
             this.pipeline=[];
             
@@ -1277,22 +1357,84 @@ db.system.js.save({
             }
             return this;
         }
-        qr.prototype.lookup=function(from,localField,foreignField,as){
-           var _from=from;
-           if(typeof from!="string"){
-	             var txt=from.toString();
-             	_from=txt.substring(db.getName().length+1,txt.length)
+        qr.prototype.lookup=function(){
+           var param1=arguments[0];
+           if(param1._shortName) {
+               var _from=param1._shortName;
+               if(arguments.length===4){
+                 localField=arguments[1];
+                 foreignField=arguments[2];
+                 as=arguments[3];
+                 this.pipeline.push({
+          	  		$lookup:{
+          	  	  		from:_from,
+          	  	  		localField:localField,
+          	  	  		foreignField:foreignField,
+          	  	  		as:as
+          	  		}
+          		});
+          		return this;
+               }
            }
-          	this.pipeline.push({
-          	  	$lookup:{
-          	  	  	from:_from,
-          	  	  	localField:localField,
-          	  	  	foreignField:foreignField,
-          	  	  	as:as
-          	  	}
-          	});
-          	return this;
+           else if(typeof param1==="string"){
+             	var _from=param1;
+             	localField=arguments[1];
+                 foreignField=arguments[2];
+                 as=arguments[3];
+                 this.pipeline.push({
+          	  		$lookup:{
+          	  	  		from:_from,
+          	  	  		localField:localField,
+          	  	  		foreignField:foreignField,
+          	  	  		as:as
+          	  		}
+          		});
+          		return this;
+           }
+           else if(param1.from &&
+           		   param1.localField &&
+           		   param1.foreignField &&
+           		   param1.as	){
+             	if(param1.from._shortName){
+             	  	param1.from=param1.from._shortName;
+             	  	this.pipeline.push({
+	          	  			$lookup:param1
+		          	});
+		          	return this;
+             	}
+             	else {
+             	  	param1.from=param1.from._shortName;
+             	  	this.pipeline.push({
+	          	  			$lookup:param1
+		          	});
+		          	return this;
+             	}
+           }
+           else if(param1.from &&
+           		   param1.let &&
+           		   param1.pipeline &&
+           		   param1.as	){
+           		    var params =[];
+				    for(var i=1;i<arguments.length;i++){
+				        params.push(arguments[i])
+				    }  
+				    var x={}
+				    x.from=param1.from;
+				    if(param1.from._shortName){
+				      x.from=param1.from._shortName;
+				      
+				    }
+				    x.let=this.parse(param.let,params);
+				    x.pipeline=param1.pipeline.pipeline;
+				    x.as= param1.as;
+				    this.pipeline.push({
+	          	  			$lookup:x
+		          	});
+		          	return this;
+           }
+           
         }
+        
         qr.prototype.join=function(from,localField,foreignField,as){
           this.lookup(from,localField,foreignField,as);
           this.unwind("$"+as);
@@ -1306,7 +1448,7 @@ db.system.js.save({
         qr.prototype.rightJoin=function(from,localField,foreignField,as){
           var ret=from;
           ret= new qr(from);
-          ret.lookup(this,foreignField,localField,as);
+          ret.lookup(this.name,foreignField,localField,as);
           ret.unwind("$"+as,true);
           return ret;
         }
