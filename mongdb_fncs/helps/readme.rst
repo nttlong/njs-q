@@ -1,7 +1,7 @@
 Aggregation Pipeline Stages
 ===========================
 
-1- `addFields <addField.rst>`_
+1- `addFields <addFields.rst>`_
     .. include:: addFields.rst
 2- `bucket <bucket.rst>`_
     .. include:: bucket.rst

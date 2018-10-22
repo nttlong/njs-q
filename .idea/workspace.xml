@@ -2,19 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0ad532da-7565-4521-907d-72b9a53bb958" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/mongdb_fncs/helps/array.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mongdb_fncs/helps/convert.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mongdb_fncs/helps/datetime.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mongdb_fncs/helps/string.rst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mongdb_fncs/helps/addFields.rst" beforeDir="false" afterPath="$PROJECT_DIR$/mongdb_fncs/helps/addFields.rst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mongdb_fncs/helps/bucket.rst" beforeDir="false" afterPath="$PROJECT_DIR$/mongdb_fncs/helps/bucket.rst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mongdb_fncs/helps/bucketAuto.rst" beforeDir="false" afterPath="$PROJECT_DIR$/mongdb_fncs/helps/bucketAuto.rst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mongdb_fncs/helps/count.rst" beforeDir="false" afterPath="$PROJECT_DIR$/mongdb_fncs/helps/count.rst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mongdb_fncs/helps/facet.rst" beforeDir="false" afterPath="$PROJECT_DIR$/mongdb_fncs/helps/facet.rst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mongdb_fncs/helps/group.rst" beforeDir="false" afterPath="$PROJECT_DIR$/mongdb_fncs/helps/group.rst" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mongdb_fncs/helps/readme.rst" beforeDir="false" afterPath="$PROJECT_DIR$/mongdb_fncs/helps/readme.rst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mongdb_fncs/mongodb_script.js" beforeDir="false" afterPath="$PROJECT_DIR$/mongdb_fncs/mongodb_script.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -41,14 +29,14 @@
         <counts>
           <entry key="Python Console" value="14" />
           <entry key="md" value="2781" />
-          <entry key="rst" value="5655" />
+          <entry key="rst" value="5656" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="Markdown" value="2781" />
           <entry key="Python" value="14" />
-          <entry key="ReST" value="5655" />
+          <entry key="ReST" value="5656" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -67,7 +55,7 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/mongdb_fncs/helps/readme.rst">
           <provider selected="true" editor-type-id="restructured-text-editor" />
         </entry>
@@ -82,7 +70,7 @@
           <provider selected="true" editor-type-id="restructured-text-editor" />
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/mongdb_fncs/helps/convert.rst">
           <provider selected="true" editor-type-id="restructured-text-editor" />
         </entry>
@@ -145,8 +133,8 @@
         <option value="$PROJECT_DIR$/mongdb_fncs/helps/datetime.rst" />
         <option value="$PROJECT_DIR$/mongdb_fncs/helps/array.rst" />
         <option value="$PROJECT_DIR$/mongdb_fncs/helps/string.rst" />
-        <option value="$PROJECT_DIR$/mongdb_fncs/helps/readme.rst" />
         <option value="$PROJECT_DIR$/mongdb_fncs/helps/convert.rst" />
+        <option value="$PROJECT_DIR$/mongdb_fncs/helps/readme.rst" />
       </list>
     </option>
   </component>
@@ -303,10 +291,10 @@
     <entry file="file://$PROJECT_DIR$/mongdb_fncs/helps/string.rst">
       <provider selected="true" editor-type-id="restructured-text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/mongdb_fncs/helps/readme.rst">
+    <entry file="file://$PROJECT_DIR$/mongdb_fncs/helps/convert.rst">
       <provider selected="true" editor-type-id="restructured-text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/mongdb_fncs/helps/convert.rst">
+    <entry file="file://$PROJECT_DIR$/mongdb_fncs/helps/readme.rst">
       <provider selected="true" editor-type-id="restructured-text-editor" />
     </entry>
   </component>
