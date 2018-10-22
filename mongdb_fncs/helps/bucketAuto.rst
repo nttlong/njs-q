@@ -1,6 +1,7 @@
 https://docs.mongodb.com/manual/reference/operator/aggregation/bucketAuto/#example
     .. code-block::
 
+        db.loadServerScripts();
         db.artwork.remove({});
         db.artwork.insertMany([
           { "_id" : 1, "title" : "The Pillars of Society", "artist" : "Grosz", "year" : 1926,
@@ -41,9 +42,8 @@ https://docs.mongodb.com/manual/reference/operator/aggregation/bucketAuto/#examp
            }
         ] )
         */
-         //console.log({x:"$push($title)"} instanceof Object)
         query("artwork").bucketAuto({
-            groupBy:"$price",
+            groupBy:"price",
             buckets:4
         })
 
@@ -53,7 +53,8 @@ Multi-Faceted Aggregation
     https://docs.mongodb.com/manual/reference/operator/aggregation/bucketAuto/#multi-faceted-aggregation
         .. code-block::
 
-              db.artwork.remove({});
+              db.loadServerScripts()
+                db.artwork.remove({});
                 db.artwork.insertMany([
                   { "_id" : 1, "title" : "The Pillars of Society", "artist" : "Grosz", "year" : 1926,
                     "price" : NumberDecimal("199.99"),
@@ -125,28 +126,27 @@ Multi-Faceted Aggregation
                   }
                 ] )
                 */
-                 //console.log({x:"$push($title)"} instanceof Object)
+
                 query("artwork").facet({
                     price:query().bucketAuto({
-                        groupBy:"$price",
+                        groupBy:"price",
                         buckets:4
                     }),
                     year:query().bucketAuto({
-                        groupBy:'$year',
+                        groupBy:'year',
                         buckets:3,
                         output:{
-                            count:"$sum(1)",
-                            year:"$push($year)"
+                            count:"sum(1)",
+                            year:"push(year)"
                         }
                     }),
                     area:query().bucketAuto({
-                        groupBy:"$dimensions.height*$dimensions.width",
+                        groupBy:"dimensions.height*dimensions.width",
                         buckets:4,
                         output:{
-                            count:"$sum(1)",
-                            titles:"$push($title)"
+                            count:"sum(1)",
+                            titles:"push(title)"
                         }
                     })
                 })
-
                 .items()

@@ -30,4 +30,4 @@ https://docs.mongodb.com/manual/reference/operator/aggregation/count/#example
             */
              //console.log({x:"$push($title)"} instanceof Object)
             query("scores").match("score>80").count("passing_scores")
-            .items()
+            .item()

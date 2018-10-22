@@ -1,6 +1,7 @@
 https://docs.mongodb.com/manual/reference/operator/aggregation/facet/#example
     .. code-block::
 
+        db.loadServerScripts();
         db.artwork.remove({});
         db.artwork.insertMany([
           { "_id" : 1, "title" : "The Pillars of Society", "artist" : "Grosz", "year" : 1926,
@@ -59,18 +60,18 @@ https://docs.mongodb.com/manual/reference/operator/aggregation/facet/#example
         */
          //console.log({x:"$push($title)"} instanceof Object)
         query("artwork").facet({
-           categorizedByTags:query().unwind("$tags").sortByCount("$tags"),
-           categorizedByPrice:query().match("$exists(price)").bucket({
-               groupBy:"$price",
+           categorizedByTags:query().unwind("tags").sortByCount("tags"),
+           categorizedByPrice:query().match("exists(price)").bucket({
+               groupBy:"price",
                boundaries:[0, 150, 200, 300, 400],
-               default:"Other",
+               default:"'Other'",
                output:{
-                   count:"$sum(1)",
-                   titles:"$push($title)"
+                   count:"sum(1)",
+                   titles:"push(title)"
                }
            }),
            "categorizedByYears(Auto)":query().bucketAuto({
-               groupBy:"$year",
+               groupBy:"year",
                buckets:4
            })
         }).items()

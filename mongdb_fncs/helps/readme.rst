@@ -11,3 +11,11 @@ Aggregation Pipeline Stages
     .. include:: bucketAuto.rst
 5- `group <group.rst>`_
     .. include:: group.rst
+5- `datetime function <datetime.rst>`_
+    .. include:: datetime.rst
+6- `string function <string.rst>`_
+    .. include:: string.rst
+7- `array function <array.rst>`_
+    .. include:: array.rst
+8- `convert function <convert.rst>`_:
+    .. include:: convert.rst

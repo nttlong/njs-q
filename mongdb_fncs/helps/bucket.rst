@@ -1,6 +1,8 @@
 https://docs.mongodb.com/manual/reference/operator/aggregation/bucket/#example
     .. code-block::
 
+        db.loadServerScripts();
+        db.artwork.remove({})
         db.artwork.insertMany([
           { "_id" : 1, "title" : "The Pillars of Society", "artist" : "Grosz", "year" : 1926,
                 "price" : NumberDecimal("199.99") },
@@ -39,16 +41,17 @@ https://docs.mongodb.com/manual/reference/operator/aggregation/bucket/#example
         query("artwork").bucket({
             groupBy: "$price",
             boundaries: [ 0, 200, 400 ],
-            default: "Other",
+            default: "'Other'",
             output:{
-                count:"$sum(1)",
-                titles:"$push($title)"
+                count:"sum(1)",
+                titles:"push(title)"
             }
         }).items()
 Using $bucket with $facet
     https://docs.mongodb.com/manual/reference/operator/aggregation/bucket/#using-bucket-with-facet
         .. code-block::
 
+            db.loadServerScripts();
             db.artwork.remove({});
             db.artwork.insertMany([
               { "_id" : 1, "title" : "The Pillars of Society", "artist" : "Grosz", "year" : 1926,
@@ -105,24 +108,24 @@ Using $bucket with $facet
               }
             ] )
             */
-             //console.log({x:"$push($title)"} instanceof Object)
+
             query("artwork").facet({
                price:query().bucket({
-                   groupBy:"$price",
+                   groupBy:"price",
                    boundaries:[0,200,400],
-                   default: "Other",
+                   default: "'Other'",
                    output:{
-                       count:"$sum(1)",
-                       artwork:"$push({0})"
+                       count:"sum(1)",
+                       artwork:"push({0})"
                    }
-               },{ "title": "$title", "year": "$year" }),
+               },query().parse({ title: "title", year: "year" })),
                year:query().bucket({
-                   groupBy: "$year",
+                   groupBy: "year",
                    boundaries: [ 1890, 1910, 1920, 1940 ],
-                   default: "Unknown",
+                   default: "'Unknown'",
                    output:{
-                       count:"$sum(1)",
-                       artwork:"$push({0})"
+                       count:"sum(1)",
+                       artwork:"push({0})"
                    }
-               },{ "title": "$title", "year": "$year" })
+               },query().parse({ title: "title", year: "year" }))
             }).items()

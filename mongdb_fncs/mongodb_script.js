@@ -1,4 +1,4 @@
-use hrm
+
 db.system.js.save({
   _id:"model",
   value:function(name,required,properties){
@@ -722,7 +722,11 @@ db.system.js.save({
         forSelect=false;
     }
     
-    var avgFuncs=";avg;sum;min;max;push;addToSet;"
+    if(fx.type=='Literal'){
+        
+        return fx.value;
+    }
+    var avgFuncs=";avg;sum;min;max;push;addToSet;strLenBytes;strLenCP;strLenBytes;sqrt;toString;type;last;first;"
     var ret={};
     var op={
         "==":"$eq",
@@ -735,7 +739,8 @@ db.system.js.save({
         "-":"$subtract",
         "*":"$multiply",
         "/":"$divide",
-        "%":"$mod"
+        "%":"$mod",
+        "^":"$pow"
     }
     var mathOp=";$add;$subtract;$multiply;$divide;$mod;";
     var matchOp=";$eq;$ne;$gt;$lt;$gte;$lte;";
@@ -744,12 +749,13 @@ db.system.js.save({
         "||":"$or"
     }
     if(fx.type==='UnaryExpression'){
+       if(fx.operator==="-"){ 
+            return -1*js_parse(fx.argument,params,forSelect,true)
+       }
        if(fx.operator==="!"){
          if(forSelect){
            	var ret={$not:[]};
-           	for(var i=0;i<fx.argument.arguments.length;i++){
-           	  	ret.$not.push(js_parse(fx.argument,params,forSelect))
-           	}
+           	ret.$not.push(js_parse(fx.argument,params,forSelect))
            	return ret;
          }
          else {
@@ -760,6 +766,7 @@ db.system.js.save({
        }
     }
     if(fx.type==='Identifier'){
+       
        if(prefix){
          return prefix+fx.name;
        }
@@ -777,36 +784,49 @@ db.system.js.save({
           return left+"."+fx.property.name
         }
     }
-    if(fx.type=='Literal'){
-        return fx.value;
-    }
+    
     if(fx.type==='BinaryExpression'){
         ret={}
-        var right = js_parse(fx.right,params,true)
-        var left = js_parse(fx.left,params,true)
+        var right = js_parse(fx.right,params,true,false,prefix);
+        var left = js_parse(fx.left,params,true,false,prefix);
+      
         if(fx.operator=='=='){
         	if(typeof left==='string'){
-            	if(typeof right=="string"){
-                
-                	ret[left]={
-                 	   $regex:new RegExp("^"+right+"$","i")
-                    
-                	};
-                	return ret
+            	if(typeof right=="string" && (!forSelect)){
+            	    left = js_parse(fx.left,params,true,false);
+                    if(forNot){
+                        ret[left]={
+                            $ne:{
+                     	        $regex:new RegExp("^"+right+"$","i")
+                            }
+                        
+                    	};
+                    	return ret
+                    }
+                    else {
+                    	ret[left]={
+                     	   $regex:new RegExp("^"+right+"$","i")
+                        
+                    	};
+                    	return ret
+                    }
             	}
             	if(!forSelect){
              	 	ret={};
+             	 	left = js_parse(fx.left,params,true,false,prefix);
               		ret[left]=right;
               		return  ret;
             	}
             	else {
+            	  left = js_parse(fx.left,params,true,false,"$");
+            	  right = js_parse(fx.right,params,true,false,"$");
             	  return {
-            	     $eq:[left.right]
+            	     $eq:[left,right]
             	  }
             	}
         	}
         	else {
-        	  
+        	   
         	}
         }
         var mOp=op[fx.operator];
@@ -817,7 +837,10 @@ db.system.js.save({
             return ret;
             
         }
-        ret[op[fx.operator]]=[left,right];
+         right = js_parse(fx.right,params,true,false,"$");
+         left = js_parse(fx.left,params,true,false,"$");
+        ret={};
+        ret[mOp]=[left,right];
             return ret;
         
         
@@ -833,14 +856,16 @@ db.system.js.save({
     if(fx.type==='CallExpression'){
         if(fx.callee.name==="exists"){
            ret={};
-            ret[js_parse(fx.arguments[0],params,true,forNot,"$")]={
+           var left=js_parse(fx.arguments[0],params,true,forNot);
+          
+            ret[left]={
                 $exists:(forNot?false:true)
             }
             return ret;
         }
         if(avgFuncs.indexOf(";"+fx.callee.name+";")>-1){
             ret={};
-            ret["$"+fx.callee.name]=js_parse(fx.arguments[0],params,true,forNot,"$");
+            ret["$"+fx.callee.name]=js_parse(fx.arguments[0],params,true,false,"$");
             return ret;
         }
         if(fx.callee.name=="getParams"){
@@ -858,9 +883,19 @@ db.system.js.save({
             var right=js_parse(fx.arguments[1],params,true,forNot);
             ret={}
             if(fx.arguments.length==2){
-                ret[left]={
-                    $regex: new RegExp(right)
-                };    
+                if(forNot){
+                    ret[left]={
+                        $ne:{
+                            $regex: new RegExp(right)
+                        }
+                    };        
+                }
+                else {
+                    ret[left]={
+                        $regex: new RegExp(right)
+                    };        
+                }
+                
             }
             else if(fx.arguments.length==3) {
                 ret[left]={
@@ -893,9 +928,12 @@ db.system.js.save({
             return ret;
         }
         if(fx.callee.name=="case"){
+            if(fx.arguments.length<2){
+                throw(new Error("case must have 2 params"))
+            }
             return {
-                case:js_parse(fx.arguments[0],params,true,"$"),
-                then:js_parse(fx.arguments[1],params,true,"$")
+                case:js_parse(fx.arguments[0],params,true,false,"$"),
+                then:js_parse(fx.arguments[1],params,true,false,"$")
             }
         }
         if(fx.callee.name=="in"){
@@ -940,7 +978,11 @@ db.system.js.save({
           	  	$dateFromString:{}
           	};
           	for(var i=0;i<fx.arguments.length;i++){
-          	   ret.$dateFromString[paramIndexs[i]]=js_parse(fx.arguments[i],params,true,forNot,"$");
+          	    var val=js_parse(fx.arguments[i],params,true,forNot,"$");
+          	    if(val!=null){
+          	        ret.$dateFromString[paramIndexs[i]]=val;     
+          	    }
+          	   
           	}
           	return ret;
         }
@@ -954,24 +996,85 @@ db.system.js.save({
 				    }
 				}
           	*/
-          	var paramIndexs=['date','format','timezone','iso8601'];
+          	var paramIndexs=['date','timezone','iso8601'];
           	var ret={
           	  	$dateToParts:{}
           	};
+          	
           	for(var i=0;i<fx.arguments.length;i++){
-          	   ret.$dateToParts[paramIndexs[i]]=js_parse(fx.arguments[i],params,true,forNot,"$");
+          	    
+          	    var val=js_parse(fx.arguments[i],params,true,forNot,"$");
+          
+          	    if(val!=null){
+          	        ret.$dateToParts[paramIndexs[i]]=val;     
+          	    }
+          	   
           	}
           	return ret;
+        }
+        if(fx.callee.name=="hour"||
+            fx.callee.name=="minute"||
+            fx.callee.name=="dayOfMonth"||
+            fx.callee.name=="dayOfYear"||
+            fx.callee.name=="second"){
+            var paramIndexs=["date", "timezone"]
+            var ret={};
+            ret["$"+fx.callee.name]={}
+          	for(var i=0;i<fx.arguments.length;i++){
+          	   ret["$"+fx.callee.name][paramIndexs[i]]=js_parse(fx.arguments[i],params,true,forNot,"$");
+          	}
+          	return ret;
+        }
+        if(fx.callee.name=="dateFromParts"){
+            var paramIndexs=["year","month","day","hour","minute","second","millisecond","timezone"];
+            var ret={$dateFromParts:{}};
+            for(var i=0;i<fx.arguments.length;i++){
+                var val=js_parse(fx.arguments[i],params,true,forNot,"$");
+                if(val!=null){
+                    ret.$dateFromParts[paramIndexs[i]]=js_parse(fx.arguments[i],params,true,forNot,"$"); 
+                }
+          	   
+          	}
+          	return ret;
+        }
+        if(fx.callee.name=="rtrim"||
+            fx.callee.name=="ltrim"){
+            var paramIndexs=["input", "chars"]
+            var ret={};
+            ret["$"+fx.callee.name]={}
+          	for(var i=0;i<fx.arguments.length;i++){
+          	   ret["$"+fx.callee.name][paramIndexs[i]]=js_parse(fx.arguments[i],params,true,forNot,"$");
+          	}
+          	return ret;    
         }
         if(fx.callee.name==="ceil"){
           return {
             	$ceil:js_parse(fx.arguments[0],params,true,forNot,"$")
           }
         }
-        if(fx.callee.name==="arrayToObject"){
-          return {
-            	$arrayToObject:js_parse(fx.arguments[0],params,true,forNot,"$")
-          }
+        if(fx.callee.name==="arrayToObject"||
+           fx.callee.name=="reverseArray"    ){
+               var ret={};
+               ret["$"+fx.callee.name]=js_parse(fx.arguments[0],params,true,forNot,"$");
+               return ret;
+        }
+        if(fx.callee.name=="reduce"){
+            /*
+                    {
+                       $reduce: {
+                          input: [ [ 3, 4 ], [ 5, 6 ] ],
+                          initialValue: [ 1, 2 ],
+                          in: { $concatArrays : ["$$value", "$$this"] }
+                       }
+                    }
+            */
+            var paramIndexs=["input", "initialValue","in"]
+            var ret={};
+            ret["$"+fx.callee.name]={}
+          	for(var i=0;i<fx.arguments.length;i++){
+          	   ret["$"+fx.callee.name][paramIndexs[i]]=js_parse(fx.arguments[i],params,true,forNot,"$");
+          	}
+          	return ret;
         }
         if(fx.callee.name==="convert"){
           	/*
@@ -990,7 +1093,11 @@ db.system.js.save({
           	  	$convert:{}
           	};
           	for(var i=0;i<fx.arguments.length;i++){
-          	   ret.$convert[paramIndexs[i]]=js_parse(fx.arguments[i],params,true,forNot,"$");
+          	    var val=js_parse(fx.arguments[i],params,true,forNot,"$");
+          	    if(val!=null){
+          	        ret.$convert[paramIndexs[i]]=val;     
+          	    }
+          	   
           	}
           	return ret;
         }
@@ -1035,6 +1142,22 @@ db.system.js.save({
             	  	$size:js_parse(fx.arguments[0],params,true,forNot,"$")
             	}
         }
+        else if(fx.callee.name=='mergeObjects'){
+            if(fx.arguments.length===1){
+                return {
+                    $mergeObjects:js_parse(fx.arguments[0],params,true,forNot,"$")
+                }
+            }
+            else {
+                var ret={
+                    $mergeObjects:[]
+                }
+                for(var i=0;i<fx.arguments.length;i++){
+                    ret.$mergeObjects.push(js_parse(fx.arguments[0],params,true,forNot,"$"))
+                }
+                return ret;
+            }
+        }
         else {
             ret={};
             var args=[];
@@ -1065,36 +1188,50 @@ db.system.js.save({
     _id:"query",
     value:function(name){
         function qr(name){
-          if(typeof name==="string"){
-            this.name=name;
-          }
-          else if(name._shortName) {
-           
-            this.name=name._shortName;
-          }
+            if(name){
+                  if(typeof name==="string"){
+                    this.name=name;
+                  }
+                  else if(name._shortName) {
+                   
+                    this.name=name._shortName;
+                  }
+            }
             this.pipeline=[];
             
         }
         qr.prototype.parse=function(obj,params,forMatch,isSecond){
+           if(obj== undefined) {
+               return undefined
+           }    
           if(!forMatch){
              forMatch=false;
           }
             if(typeof obj ==="string"){
-              return js_parse(jsep(obj,params),params,!forMatch);
+                
+              if(forMatch){
+                    return js_parse(jsep(obj,params),params,forMatch,false,"$");    
+              }
+              else {
+                  return js_parse(jsep(obj,params),params,forMatch,false,"$");    
+              }
+              
             }
             var txt=JSON.stringify(obj);
+            
             if(txt[0]==="{" && txt[txt.length-1]==="}"){
                 var ret={};
                 var keys= Object.keys(obj);
                 for(var i=0;i<keys.length;i++){
                     var key=keys[i];
                     var val= obj[key];
+            
                     var r=this.parse(val,params,forMatch);
                     if(typeof r==="string"){
-                      ret[key]="$"+this.parse(val,params,forMatch)
+                      ret[key]=this.parse(val,params,forMatch,true,"$")
                     }
                     else {
-                      ret[key]=this.parse(val,params,forMatch)	
+                      ret[key]=this.parse(val,params,forMatch,true,"$")	
                     }
                     
                 }
@@ -1169,7 +1306,7 @@ db.system.js.save({
 		    for(var i=1;i<arguments.length;i++){
 		        params.push(arguments[i])
 		    }
-		     db.debugs.insertOne(params)
+		    
 		    this.pipeline.push({
 		        $match: expr(_expr,params)
 		    });
@@ -1198,6 +1335,7 @@ db.system.js.save({
             return this;
         }
         qr.prototype.sort=function(){
+            
             this.pipeline.push({
                 $sort:arguments[0]
             });
@@ -1227,8 +1365,12 @@ db.system.js.save({
             return this;
         }
         qr.prototype.sortByCount=function(){
+            var params =[];
+		    for(var i=1;i<arguments.length;i++){
+		        params.push(arguments[i])
+		    }
             this.pipeline.push({
-                $sortByCount:arguments[0]
+                $sortByCount:this.parse(arguments[0],params,false,false)
             });
             return this;
         }
@@ -1236,7 +1378,7 @@ db.system.js.save({
     
             if(arguments.length==1){
                 this.pipeline.push({
-                    $unwind:arguments[0]
+                    $unwind:"$"+arguments[0]
                 });
                 return this;
             }
@@ -1244,7 +1386,7 @@ db.system.js.save({
                 if(typeof arguments[1]==="string"){
                     this.pipeline.push({
                         $unwind:{
-                            path:arguments[0],
+                            path:"$"+arguments[0],
                             includeArrayIndex:arguments[1]
                         }
                     });
@@ -1254,7 +1396,7 @@ db.system.js.save({
                 if(typeof arguments[1]==="boolean"){
                     this.pipeline.push({
                         $unwind:{
-                            path:arguments[0],
+                            path:"$"+arguments[0],
                             preserveNullAndEmptyArrays:arguments[1]
                         }
                     });
@@ -1265,7 +1407,7 @@ db.system.js.save({
                 if(typeof arguments[1]==="string"){
                     this.pipeline.push({
                         $unwind:{
-                            path:arguments[0],
+                            path:"$"+arguments[0],
                             includeArrayIndex:arguments[1],
                             preserveNullAndEmptyArrays:arguments[2]
                         }
@@ -1275,7 +1417,7 @@ db.system.js.save({
                 if(typeof arguments[1]==="boolean"){
                     this.pipeline.push({
                         $unwind:{
-                            path:arguments[0],
+                            path:"$"+arguments[0],
                             preserveNullAndEmptyArrays:arguments[1],
                             includeArrayIndex:arguments[2],
                         }
@@ -1329,9 +1471,9 @@ db.system.js.save({
             if(typeof data.groupBy!=="string"){
                 throw(new Error("'groupBy' must be a string"))
             }
-            var groupBy=js_parse(jsep(data.groupBy,params),params);
+            var groupBy=js_parse(jsep(data.groupBy,params),params,false,false,"$");
             var output=this.parse(data.output,params);
-            var _default=this.parse(data.default,params);
+            var _default=this.parse(data.default,params,false,false,"$");
             this.pipeline.push({
                 $bucket:{
                     groupBy:groupBy,
@@ -1352,8 +1494,8 @@ db.system.js.save({
              if(data.buckets===undefined){
                  throw(new Error('bucketAuto need a "buckets" fields with numeric data type'))
              }
-             var groupBy=js_parse(jsep(data.groupBy,params),params);
-             if(!dara.output){
+             var groupBy=js_parse(jsep(data.groupBy,params),params,false,false,"$");
+             if(!data.output){
                  this.pipeline.push({
                      $bucketAuto:{
                          groupBy:groupBy,
@@ -1366,7 +1508,7 @@ db.system.js.save({
                      $bucketAuto:{
                          groupBy:groupBy,
                          buckets:data.buckets,
-                         output:this.parse(data.output,params)
+                         output:this.parse(data.output,params,false,false,"$")
                      }
                  });
              }
@@ -1385,9 +1527,9 @@ db.system.js.save({
                 _facet[key]=val.pipeline;
                 
             }
-            this.pipeline={
+            this.pipeline.push({
                 $facet:_facet
-            }
+            });
             return this;
         }
         qr.prototype.lookup=function(){
@@ -1470,19 +1612,19 @@ db.system.js.save({
         
         qr.prototype.join=function(from,localField,foreignField,as){
           this.lookup(from,localField,foreignField,as);
-          this.unwind("$"+as);
+          this.unwind(as);
           return this;
         }
         qr.prototype.leftJoin=function(from,localField,foreignField,as){
           this.lookup(from,localField,foreignField,as);
-          this.unwind("$"+as,true);
+          this.unwind(as,true);
           return this;
         }
         qr.prototype.rightJoin=function(from,localField,foreignField,as){
           var ret=from;
           ret= new qr(from);
           ret.lookup(this.name,foreignField,localField,as);
-          ret.unwind("$"+as,true);
+          ret.unwind(as,true);
           return ret;
         }
         qr.prototype.group=function(){
@@ -1492,6 +1634,7 @@ db.system.js.save({
 		        params.push(arguments[i])
 		    }
 		    var data=this.parse(selectors,params);
+		    
 		    this.pipeline.push({
 		        $group:data
 		    });

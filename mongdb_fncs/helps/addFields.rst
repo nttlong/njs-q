@@ -2,6 +2,7 @@ https://docs.mongodb.com/manual/reference/operator/aggregation/addFields/#exampl
     .. code-block::
 
         db.loadServerScripts();
+        db.scores.remove({});
         db.scores.insertMany([
             {
           _id: 1,
@@ -33,37 +34,41 @@ https://docs.mongodb.com/manual/reference/operator/aggregation/addFields/#exampl
         // ] )
 
         query("scores").addFields({
-            totalHomework:"$sum($homework)",
-            totalQuiz:"$sum($quiz)"
+            totalHomework:"sum(homework)",
+            totalQuiz:"sum(quiz)"
         })
         .addFields({
-            totalScore:"$totalHomework+$totalQuiz+$extraCredit"
+            totalScore:"totalHomework+totalQuiz+extraCredit"
         }).items()
 
 Adding Fields to an Embedded Document
     https://docs.mongodb.com/manual/reference/operator/aggregation/addFields/#adding-fields-to-an-embedded-document
         .. code-block::
 
-            db.vehicles.insertMany([
-                { _id: 1, type: "car", specs: { doors: 4, wheels: 4 } },
-                { _id: 2, type: "motorcycle", specs: { doors: 0, wheels: 2 } },
-                { _id: 3, type: "jet ski" }
-            ])
+            db.loadServerScripts();
 
-            /*
-                db.vehicles.aggregate( [
-                    {
-                       $addFields: {
-                          "specs.fuel_type": "unleaded"
-                       }
-                    }
-               ] )
-            */
+            db.vehicles.remove({})
+            db.vehicles.insertMany([
+                            { _id: 1, type: "car", specs: { doors: 4, wheels: 4 } },
+                            { _id: 2, type: "motorcycle", specs: { doors: 0, wheels: 2 } },
+                            { _id: 3, type: "jet ski" }
+                        ])
+
+            //             /*
+            //                 db.vehicles.aggregate( [
+            //                     {
+            //                       $addFields: {
+            //                           "specs.fuel_type": "unleaded"
+            //                       }
+            //                     }
+            //               ] )
+            //             */
 
             query("vehicles").addFields({
-                "specs.fuel_type": "unleaded"
-            })
-            .items()
+                "specs.fuel_type": "'unleaded'"
+            },["unleaded"])
+            // .pipeline
+             .items()
 
 Overwriting an existing field
     https://docs.mongodb.com/manual/reference/operator/aggregation/addFields/#overwriting-an-existing-field
