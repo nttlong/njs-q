@@ -19,3 +19,15 @@ Aggregation Pipeline Stages
     .. include:: array.rst
 8- `convert function <convert.rst>`_:
     .. include:: convert.rst
+9- `lookup <lookup.rst>`_
+    .. include:: lookup.rst
+10- `match <match.rst>`_
+    .. include:: match.rst
+11- `out <out.rst>`_
+    .. include:: out.rst
+12- `project <project.rst>`_
+    .. include:: project.rst
+13- `redact <redact.rst>`_
+    .. include:: redact.rst
+14- `replaceRoot <replaceRoot.rst>`_
+    .. include:: replaceRoot.rst

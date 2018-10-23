@@ -1153,7 +1153,7 @@ db.system.js.save({
                     $mergeObjects:[]
                 }
                 for(var i=0;i<fx.arguments.length;i++){
-                    ret.$mergeObjects.push(js_parse(fx.arguments[0],params,true,forNot,"$"))
+                    ret.$mergeObjects.push(js_parse(fx.arguments[i],params,true,forNot,"$"))
                 }
                 return ret;
             }
@@ -1434,7 +1434,7 @@ db.system.js.save({
 		    }
             if(typeof _obj == "string"){
                 this.pipeline.push({
-                    $replaceRoot: { newRoot: _obj }
+                    $replaceRoot: { newRoot: this.parse(_obj,params) }
                 });
                 return this;
             }
@@ -1586,7 +1586,7 @@ db.system.js.save({
              	}
            }
            else if(param1.from &&
-           		   param1.let &&
+           		  
            		   param1.pipeline &&
            		   param1.as	){
            		    var params =[];
@@ -1599,7 +1599,9 @@ db.system.js.save({
 				      x.from=param1.from._shortName;
 				      
 				    }
-				    x.let=this.parse(param.let,params);
+				    if(param1.let){
+				        x.let=this.parse(param1.let,params);
+				    }
 				    x.pipeline=param1.pipeline.pipeline;
 				    x.as= param1.as;
 				    this.pipeline.push({
@@ -1644,8 +1646,35 @@ db.system.js.save({
           	this.pipeline.push({
           	   $out:name
           	});
-          	this.items();
-          	return new query(name);
+          	var op={
+                allowDiskUse:true
+            }
+            
+            if(this.coll){
+               
+              	 return this.coll.aggregate(this.pipeline,op);
+            }
+            else {
+               
+            	return db.getCollection(this.name).aggregate(this.pipeline,op);
+            }
+          
+        }
+        qr.prototype.redact=function(){
+            var selectors=arguments[0];
+            
+            var params =[];
+		    for(var i=1;i<arguments.length;i++){
+		        params.push(arguments[i])
+		    }
+		   
+		    var data=this.parse(selectors,params);
+		    
+		    this.pipeline.push({
+		        $redact:data
+		    })
+            //js_parse(jsep(expr,params),params);
+            return this;
         }
         qr.prototype.createView=function(name,options){
            
