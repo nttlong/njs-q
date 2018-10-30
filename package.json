@@ -45,7 +45,7 @@
     "deasync": "^0.1.13",
     "ect": "^0.5.9",
     "elasticsearch": "^15.1.1",
-    "express": "^4.16.3",
+    "express": "^4.16.4",
     "express-fileupload": "^1.0.0-alpha.1",
     "express-session": "^1.15.6",
     "filewatcher": "^3.0.1",

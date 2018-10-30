@@ -1,4 +1,4 @@
-var api=require("../q-api");
+//var api=require("../q-api");
 var tenancy=require("../q-apps/tenancy");
 var sync=require("../q-sync");
 var path=require("path");
