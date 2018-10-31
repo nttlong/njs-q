@@ -7,6 +7,7 @@ var pageNunjucksExtent=require("./page-nunjucks-extent");
 var pageNunjucksInclude=require("./page-nunjucks-include");
 var fs = require("fs");
 var pageGetContentServer = require("./page-get-server-script");
+var pageGetContentServerWithSrc = require("./page-get-server-script-with-src");
 var pageResolveClientStaticScript = require("./page-resolve-client-static-script");
 var pageServerFunctions = require("./page-server-functions");
 var pageLockRunner = require("./page-lock-runner");
@@ -93,6 +94,9 @@ function applyLanguage(req, languageInfo, info, context) {
     if (ret.script) {
         ret.runner = eval(ret.script);
     }
+    else if(ret.scriptPath){
+        ret.runner =require(ret.scriptPath);
+    }
     return ret;
 }
 function loadFile(req, res, file, context) {
@@ -102,6 +106,11 @@ function loadFile(req, res, file, context) {
 
     var languageInfo = pageLanguage.extractItems(content);
     var ret = pageGetContentServer(languageInfo.content);
+    var retSrc=pageGetContentServerWithSrc(file,languageInfo.content);
+    ret.content =retSrc.content;
+    if(retSrc.scriptPath){
+        ret.scriptPath=retSrc.scriptPath;
+    }
     ret.content = pageResolveClientStaticScript(req, res, ret.content, context);
     ret.content = pageServerFunctions(req, res, ret.content, context);
     ret.content = pageAjax.commileApiClient(req, res, ret.content, context);
@@ -115,6 +124,7 @@ function loadFile(req, res, file, context) {
     }
     ret.includeInfo=[];
     for(var i=0;i<includeFiles.length;i++){
+       
         ret.includeInfo.push(loadFile(
             req,
             res,
@@ -132,6 +142,19 @@ function loadFile(req, res, file, context) {
     req.setViewPath(ret.relFileName);
     ret = applyLanguage(req, languageInfo, ret, context);
     var lang = req.getLanguage();
+    if(ret.scriptPath){
+        if (!wacthCache[ret.scriptPath]) {
+            require('chokidar').watch(ret.scriptPath, {}).on('change', function (path, stats) {
+                delete require.cache[path];
+                ret.runner =require(ret.scriptPath);
+                var pageCompiler = require("./page-compiler");
+                pageCompiler.clearCache();
+                global[key][lang]={};
+                if (stats) console.log('File', path, 'changed size to', stats.size);
+            });
+            wacthCache[file] = file;
+        }
+    }
     if (!wacthCache[file]) {
         require('chokidar').watch(file, {}).on('change', function (path, stats) {
             var pageCompiler = require("./page-compiler");
