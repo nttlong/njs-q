@@ -84,7 +84,10 @@ function loadHtml(appName,language,file){
     return cache[language][file];
 }
 function compile(context,info,req,res,next){
+    var ext=require("./request-ext")
+    
     var model={};
+    ext(context,model,req,res);
     nunjucks.configure(
         "".getRootDir("apps", context.app.name,"views"), 
         {
@@ -100,6 +103,7 @@ function compile(context,info,req,res,next){
         }
     });
     if(info.fn){
+
         var ret=info.fn(model,req,res,next);
         if(req.header("AJAX-POST")){
             if(ret.ajax && ret.ajax[req.header("AJAX-POST")]){
