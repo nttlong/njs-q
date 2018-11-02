@@ -5,7 +5,9 @@ var pageGetContentServer=require("./page-get-server-script");
 var nunjucks = require( 'nunjucks' ) ;
 var pageLanguage=require("./page-language");
 var qLanguage=require("../q-language");
+var pageGetContentServerWithSrc=require("./page-get-server-script-with-src");
 var cache={}
+var wacthCache={};
 function loadHtml(appName,language,file){
     if(cache[language] && cache[language][file]){
         return cache[language][file];
@@ -19,8 +21,29 @@ function loadHtml(appName,language,file){
                 var fs=require("fs");
                 var txt=fs.readFileSync(file,"utf-8");
                 var info= pageLanguage.extractItems(txt);
+                
                 var ret=pageGetContentServer(info.content);
-                if(ret.script){
+                var retSrc=pageGetContentServerWithSrc(file,info.content);
+                ret.content =retSrc.content;
+                if(retSrc.scriptPath){
+                    ret.scriptPath=retSrc.scriptPath;
+                }
+                if(ret.scriptPath){
+                    ret.fn = require(ret.scriptPath);
+
+                    if (!wacthCache[ret.scriptPath]) {
+                        require('chokidar').watch(ret.scriptPath, {}).on('change', function (path, stats) {
+                            delete require.cache[path];
+                            ret.runner =require(ret.scriptPath);
+                            var pageCompiler = require("./page-compiler");
+                            pageCompiler.clearCache();
+                            global[key][lang]={};
+                            if (stats) console.log('File', path, 'changed size to', stats.size);
+                        });
+                        wacthCache[file] = file;
+                    }
+                }
+                else if(ret.script){
                     ret.fn=eval(ret.script);
                 }
                 require('chokidar').watch(file, {}).on('change', function (path, stats) {
