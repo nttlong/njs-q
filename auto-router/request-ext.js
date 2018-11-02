@@ -89,7 +89,7 @@ function apply(context,model,req,res){
         return LANGUAGE.getItem(getLanguage(), context.app.name, owner.fileName, key, value);
     };
     var getCurrentUrl = function () {
-        var _url = req.url.split('?')[0];
+        var _url = req.baseUrl.split('?')[0];
         return req.getAppUrl(_url.substring(1, _url.length))
     };
     var setUser = function (user) {
