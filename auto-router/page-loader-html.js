@@ -34,10 +34,15 @@ function loadHtml(appName,language,file){
                     if (!wacthCache[ret.scriptPath]) {
                         require('chokidar').watch(ret.scriptPath, {}).on('change', function (path, stats) {
                             delete require.cache[path];
-                            ret.runner =require(ret.scriptPath);
-                            var pageCompiler = require("./page-compiler");
-                            pageCompiler.clearCache();
+                            try {
+                                ret.runner = require(ret.scriptPath);
+                                var pageCompiler = require("./page-compiler");
+                                pageCompiler.clearCache();
+                            } catch (error) {
+                                console.log(error);
+                            }
                           
+                            
                         });
                         wacthCache[file] = file;
                     }
