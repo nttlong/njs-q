@@ -85,7 +85,7 @@ function excutor(app,info){
         if(res.headersSent){
             return;
         }
-        if(info.runner){
+        if (info.runner && typeof info.runner === "function"){
             var retFn = info.runner(model, req, res, next)||{};
             if(req.header("AJAX-POST") && retFn.ajax && retFn.ajax[req.header("AJAX-POST") ]){
                 var jsonData=require("../q-json").fromJSON(req.body);
