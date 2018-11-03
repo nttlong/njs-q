@@ -37,8 +37,7 @@ function loadHtml(appName,language,file){
                             ret.runner =require(ret.scriptPath);
                             var pageCompiler = require("./page-compiler");
                             pageCompiler.clearCache();
-                            global[key][language]={};
-                            if (stats) console.log('File', path, 'changed size to', stats.size);
+                          
                         });
                         wacthCache[file] = file;
                     }
