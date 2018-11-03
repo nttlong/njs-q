@@ -147,7 +147,7 @@ function loadFile(req, res, file, context) {
             require('chokidar').watch(ret.scriptPath, {}).on('change', function (path, stats) {
                 delete require.cache[path];
                 try {
-                    ret.runner = require(rpath);
+                    ret.runner = require(path);
                     var pageCompiler = require("./page-compiler");
                     pageCompiler.clearCache();
                     global[key][lang] = {};
