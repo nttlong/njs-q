@@ -146,11 +146,17 @@ function loadFile(req, res, file, context) {
         if (!wacthCache[ret.scriptPath]) {
             require('chokidar').watch(ret.scriptPath, {}).on('change', function (path, stats) {
                 delete require.cache[path];
-                ret.runner =require(ret.scriptPath);
-                var pageCompiler = require("./page-compiler");
-                pageCompiler.clearCache();
-                global[key][lang]={};
-                if (stats) console.log('File', path, 'changed size to', stats.size);
+                try {
+                    ret.runner = require(rpath);
+                    var pageCompiler = require("./page-compiler");
+                    pageCompiler.clearCache();
+                    global[key][lang] = {};
+                    if (stats) console.log('File', path, 'changed size to', stats.size);
+                } catch (error) {
+                    console.log(path);
+                    console.log(error);
+                }
+               
             });
             wacthCache[file] = file;
         }
