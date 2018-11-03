@@ -6,6 +6,14 @@ function setIsCacheTemplate(val){
 function getIsCacheTemplate(val) {
     return _isTemplateCache;
 }
+var cnn = undefined;
+function setConnect(url) {
+    cnn = require("mongoose").createConnection(url);
+    return cnn;
+}
+function getConnect() {
+    return cnn;
+}
 module.exports={
     setIsCacheTemplate: setIsCacheTemplate,
     getIsCacheTemplate: getIsCacheTemplate,
@@ -23,5 +31,7 @@ module.exports={
     },
     getRootDir: function(){
         return global.__rootDir;
-    }
+    },
+    setConnect: setConnect,
+    getConnect: getConnect
 }
